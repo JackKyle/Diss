@@ -1,7 +1,5 @@
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-var width = canvas.width;
-var height = canvas.height;
+import { ctx, width, height } from './engineConfig.js';
+console.log(width, height);
 const BallArray = [];
 
 class Vector{
@@ -61,6 +59,7 @@ class Ball{
         ctx.closePath();
     }
 }
+
 let friction = 0.002;
 function BallVectors1(ball_1){
     ball_1.velocity.x_vector += ball_1.acceleration.x_vector;
@@ -83,6 +82,8 @@ function BallVectors1(ball_1){
         }
         ball_1.velocity.y_vector = ball_1.velocity.y_vector * -1;
     }
+    ball_1.velocity.x_vector *= 1 - friction;
+    ball_1.velocity.y_vector *= 1 - friction;
 }
 function BallVectors2(ball_1, ball_2){
     //acceleration values added to the velocity components
@@ -178,6 +179,7 @@ function BallVectors2(ball_1, ball_2){
 function mainLoop() {
     ctx.clearRect(0, 0, width, height);
     BallArray.forEach((ball_1, index) => {
+        console.log(ball_1.velocity.x_vector)
         ball_1.drawBall();
         if (index !== BallArray.length-1){
             for(let num = index+1; num<BallArray.length; num++){
@@ -192,22 +194,4 @@ function mainLoop() {
     });
     requestAnimationFrame(mainLoop);
 }
-
-
-let Ball1 = new Ball(100, 100, 10, 500, "black", "red");
-Ball1.velocity.x_vector = 10;
-Ball1.velocity.y_vector = 5;
-
-let Ball2 = new Ball(1300, 700, 15, 100, "black", "yellow");
-Ball2.velocity.x_vector = -10;
-Ball2.velocity.y_vector = -5;
-
-let Ball3 = new Ball(100, 700, 30, 1, "black", "pink");
-Ball3.velocity.x_vector = 2;
-Ball3.velocity.y_vector = -1;
-
-let Ball4 = new Ball(1300, 100, 20, 1, "black", "black");
-Ball4.velocity.x_vector =-10;
-Ball4.velocity.y_vector = 5;
-
-requestAnimationFrame(mainLoop);
+export { mainLoop, Ball};
