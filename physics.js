@@ -1,7 +1,6 @@
 import { ctx, width, height } from './engineConfig.js';
-console.log(width, height);
 const BallArray = [];
-
+const frictionSquareArray = [];
 class Vector{
     constructor(x_vector, y_vector){
         this.x_vector = x_vector;
@@ -60,20 +59,32 @@ class Ball{
     }
 }
 
-let friction = 0.002;
-function BallVectors1(ball_1){
+class frictionZone{
+    constructor(upperxpoint, upperypoint, xlength, ylength, outline, fill, friction){
+        this.upperpoint = new Vector (upperxpoint, upperypoint);
+        this.length = new Vector (xlength, ylength);
+        this.outline = outline;
+        this.fill = fill;
+        this.friction = friction;
+        frictionSquareArray.push(this);
+    }
+
+    drawSquare(){
+        ctx.beginPath();
+        ctx.rect(this.upperpoint.x_vector, this.upperpoint.y_vector, this.length.x_vector, this.length.y_vector);
+        ctx.strokeStyle = this.outline;
+        ctx.stroke();
+        ctx.fillStyle = this.fill;
+        ctx.fill();
+        ctx.closePath();
+    }
+}
+
+let friction = 0.001;
+function BallVectors1(ball_1, square_1){
     ball_1.velocity.x_vector += ball_1.acceleration.x_vector;
     ball_1.velocity.y_vector += ball_1.acceleration.y_vector;
-    ball_1.centre.x_vector += ball_1.velocity.x_vector;
-    ball_1.centre.y_vector += ball_1.velocity.y_vector;
-    if (ball_1.centre.x_vector <= ball_1.radius || ball_1.centre.x_vector >= (width-ball_1.radius)){
-        if (ball_1.centre.x_vector<=ball_1.radius){
-            ball_1.centre.x_vector = ball_1.radius;
-        } else if (ball_1.centre.x_vector >= (width-ball_1.radius)){
-            ball_1.centre.x_vector = width - ball_1.radius;
-        }
-        ball_1.velocity.x_vector = -1 * ball_1.velocity.x_vector;
-    }
+
     if (ball_1.centre.y_vector <= ball_1.radius || ball_1.centre.y_vector >= (height-ball_1.radius)){
         if (ball_1.centre.y_vector<=ball_1.radius){
             ball_1.centre.y_vector = ball_1.radius;
@@ -82,13 +93,40 @@ function BallVectors1(ball_1){
         }
         ball_1.velocity.y_vector = ball_1.velocity.y_vector * -1;
     }
-    ball_1.velocity.x_vector *= 1 - friction;
-    ball_1.velocity.y_vector *= 1 - friction;
+    if (ball_1.centre.x_vector <= ball_1.radius || ball_1.centre.x_vector >= (width-ball_1.radius)){
+        if (ball_1.centre.x_vector<=ball_1.radius){
+            ball_1.centre.x_vector = ball_1.radius;
+        } else if (ball_1.centre.x_vector >= (width-ball_1.radius)){
+            ball_1.centre.x_vector = width - ball_1.radius;
+        }
+        ball_1.velocity.x_vector = -1 * ball_1.velocity.x_vector;
+    } 
+    if ((ball_1.centre.x_vector>=square_1.upperpoint.x_vector&&ball_1.centre.x_vector<=
+        (square_1.upperpoint.x_vector+square_1.length.x_vector)) && 
+        (ball_1.centre.y_vector>=square_1.upperpoint.y_vector&&ball_1.centre.y_vector<=
+        (square_1.upperpoint.y_vector+square_1.length.y_vector))){
+            ball_1.velocity.x_vector *= 1 - square_1.friction;
+            ball_1.velocity.y_vector *= 1 - square_1.friction;
+    } else {
+        ball_1.velocity.x_vector *= 1 - friction;
+        ball_1.velocity.y_vector *= 1 - friction;
+    }
+    
+    ball_1.centre.x_vector += ball_1.velocity.x_vector;
+    ball_1.centre.y_vector += ball_1.velocity.y_vector;
 }
-function BallVectors2(ball_1, ball_2){
+function BallVectors2(ball_1, ball_2, square_1){
     //acceleration values added to the velocity components
     ball_1.velocity.x_vector += ball_1.acceleration.x_vector;
     ball_1.velocity.y_vector += ball_1.acceleration.y_vector;
+        if ((ball_1.centre.x_vector>=square_1.upperpoint.x_vector&&ball_1.centre.x_vector<=
+            (square_1.upperpoint.x_vector+square_1.length.x_vector)) && 
+            (ball_1.centre.y_vector>=square_1.upperpoint.y_vector&&ball_1.centre.y_vector<=
+            (square_1.upperpoint.y_vector+square_1.length.y_vector))){
+                ball_1.velocity.x_vector *= 1 - square_1.friction;
+                ball_1.velocity.y_vector *= 1 - square_1.friction;
+        };
+    
     if (ball_1.centre.x_vector <= ball_1.radius || ball_1.centre.x_vector >= (width-ball_1.radius)){
         if (ball_1.centre.x_vector<=ball_1.radius){
             ball_1.centre.x_vector = ball_1.radius;
@@ -109,9 +147,6 @@ function BallVectors2(ball_1, ball_2){
     //velocity gets multiplied by a number between 0 and 1
     //ball_1.vel_x *= 1-friction;
     //ball_1.vel_y *= 1-friction;
-    //velocity values added to the current x, y position
-    ball_1.centre.x_vector += ball_1.velocity.x_vector;
-    ball_1.centre.y_vector += ball_1.velocity.y_vector;
             //distance between two centres in x and y directions
             let distance_x = ball_1.centre.x_vector-ball_2.centre.x_vector;
             let distance_y = ball_1.centre.y_vector-ball_2.centre.y_vector;
@@ -170,28 +205,42 @@ function BallVectors2(ball_1, ball_2){
                 ball_2.velocity.x_vector = newBall2NormalVectorVelocity.x_vector+newBall2TangentVectorVelocity.x_vector;
                 ball_2.velocity.y_vector = newBall2NormalVectorVelocity.y_vector+newBall2TangentVectorVelocity.y_vector;
             };
-    ball_1.velocity.x_vector *= 1 - friction;
-    ball_1.velocity.y_vector *= 1 - friction;
+            if ((ball_1.centre.x_vector>=square_1.upperpoint.x_vector&&ball_1.centre.x_vector<=
+                (square_1.upperpoint.x_vector+square_1.length.x_vector)) && 
+                (ball_1.centre.y_vector>=square_1.upperpoint.y_vector&&ball_1.centre.y_vector<=
+                (square_1.upperpoint.y_vector+square_1.length.y_vector))){
+                    ball_1.velocity.x_vector *= 1 - square_1.friction;
+                    ball_1.velocity.y_vector *= 1 - square_1.friction;
+            } else {
+                ball_1.velocity.x_vector *= 1 - friction;
+                ball_1.velocity.y_vector *= 1 - friction;
+            }
+            //velocity values added to the current x, y position
+    ball_1.centre.x_vector += ball_1.velocity.x_vector;
+    ball_1.centre.y_vector += ball_1.velocity.y_vector;
+    
 }
 
 
 
 function mainLoop() {
     ctx.clearRect(0, 0, width, height);
+    frictionSquareArray.forEach((square_1) => {
+        square_1.drawSquare();
     BallArray.forEach((ball_1, index) => {
-        console.log(ball_1.velocity.x_vector)
         ball_1.drawBall();
         if (index !== BallArray.length-1){
             for(let num = index+1; num<BallArray.length; num++){
-                BallVectors2(BallArray[index], BallArray[num]);
+                BallVectors2(BallArray[index], BallArray[num], square_1);
             }
         } else {
-            BallVectors1(ball_1);
+            BallVectors1(ball_1, square_1);
         }
         
         
         ball_1.display();
     });
+});
     requestAnimationFrame(mainLoop);
 }
-export { mainLoop, Ball};
+export { mainLoop, frictionZone, Ball};
