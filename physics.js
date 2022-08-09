@@ -3,6 +3,7 @@ const BallArray = [];
 const frictionSquareArray = [];
 const magnetArray = [];
 let friction = 0.000001;
+let count = 1;
 class Vector{
     constructor(x_vector, y_vector){
         this.x_vector = x_vector;
@@ -23,15 +24,24 @@ class Vector{
     }
 }
 class Ball{
-    constructor(xpoint, ypoint, radius, mass, outline, fill){
+    constructor(xpoint, ypoint, radius, mass, velocityx, velocityy, magnetic, pole, magnetism, stationary, outline, fill){
         this.centre = new Vector(xpoint, ypoint);
         this.radius = radius;
         this.mass = mass;
-        this.velocity = new Vector(0,0);
+        this.magnetic = magnetic;
+        if (this.magnetic == true){
+            this.pole = pole;    
+            this.magnetism = magnetism;
+        } else {
+            this.pole = "N/A";
+            this.magnetism = 0;
+        }
+        this.velocity = new Vector(velocityx,velocityy);
         this.acceleration = new Vector(0,0);
-        BallArray.push(this);
+        this.stationary = stationary;
         this.outline = outline;
         this.fill = fill;
+        BallArray.push(this);
     }
 
     drawBall(){
@@ -83,10 +93,11 @@ class FrictionZone{
 }
 
 class Magnet{
-    constructor(xpoint, ypoint, radius, magnetism, outline, fill){
+    constructor(xpoint, ypoint, radius, magnetism, pole, outline, fill){
         this.centre = new Vector (xpoint, ypoint);
         this.radius = radius;
         this.magnetism = magnetism;
+        this.pole = pole;
         this.outline = outline;
         this.fill = fill;
         magnetArray.push(this);
@@ -102,28 +113,44 @@ class Magnet{
     }
 }
 
-function BallVectors(ball_1, ball_2){
+function checkCollision (ball_1, ball_2){
     //distance between two centres in x and y directions
     let distance_x = ball_1.centre.x_vector-ball_2.centre.x_vector;
     let distance_y = ball_1.centre.y_vector-ball_2.centre.y_vector;
     //magnitude of distance to give a scalar number distance between two centres
     let distance_magnitude = Math.sqrt(distance_x**2+distance_y**2);
-    if (ball_1.radius+ball_2.radius>=distance_magnitude){
-        if (ball_1.radius+ball_2.radius>distance_magnitude){
-            //overlap between balls (if 0 then no overlap)
-            let diff = ball_1.radius+ball_2.radius - distance_magnitude;
-            //calculating amount of distance each ball must be moved to make them no longer overlap but still touch
-            //calculated by taking the total distance in each plane and dividing it by the total distance magnitude and multiplying 
-            //it by the overlap divided by two so that it takes the fact they are each moving half the distance into account
-            //each is then added to ball 1 and subtracted from ball 2 in order to ensure each ball moves an equal amount 
-            //from the other, producing no overlap in the end
-            let move_x = (distance_x/distance_magnitude)*(diff/2);
-            let move_y = (distance_y/distance_magnitude)*(diff/2);
+    if (ball_1.radius+ball_2.radius>distance_magnitude){
+        //overlap between balls (if 0 then no overlap)
+        let diff = ball_1.radius+ball_2.radius - distance_magnitude;
+        //calculating amount of distance each ball must be moved to make them no longer overlap but still touch
+        //calculated by taking the total distance in each plane and dividing it by the total distance magnitude and multiplying 
+        //it by the overlap divided by two so that it takes the fact they are each moving half the distance into account
+        //each is then added to ball 1 and subtracted from ball 2 in order to ensure each ball moves an equal amount 
+        //from the other, producing no overlap in the end
+        let move_x = (distance_x/distance_magnitude)*(diff/2);
+        let move_y = (distance_y/distance_magnitude)*(diff/2);
+        if (ball_1.stationary == false && ball_2.stationary == false){
             ball_1.centre.x_vector += move_x;
-            ball_1.centre.y_vector += move_y;
+            ball_1.centre.y_vector += move_y;   
             ball_2.centre.x_vector -= move_x;
-            ball_2.centre.y_vector -= move_y;
+            ball_2.centre.y_vector -= move_y;   
+        } else if (ball_1.stationary == true && ball_2.stationary == false) {
+            ball_2.centre.x_vector -= 2*move_x;
+            ball_2.centre.y_vector -= 2*move_y;
+        } else {
+            ball_1.centre.x_vector += 2*move_x;
+            ball_1.centre.y_vector += 2*move_y; 
         }
+    }
+}
+
+function ballVectors(ball_1, ball_2){
+    //distance between two centres in x and y directions
+    let distance_x = ball_1.centre.x_vector-ball_2.centre.x_vector;
+    let distance_y = ball_1.centre.y_vector-ball_2.centre.y_vector;
+    //magnitude of distance to give a scalar number distance between two centres
+    let distance_magnitude = Math.sqrt(distance_x**2+distance_y**2);
+    if (ball_1.radius+ball_2.radius==distance_magnitude){
         //normal vector of collision found from taking centre of circle 1 from centre of circle 2
         let normalVector = new Vector(ball_2.centre.x_vector - ball_1.centre.x_vector, 
         ball_2.centre.y_vector - ball_1.centre.y_vector);
@@ -165,14 +192,22 @@ function BallVectors(ball_1, ball_2){
 
 //function to add acceleration to the velocity
 function addAcceleration(ball_1){
-    ball_1.velocity.x_vector += ball_1.acceleration.x_vector;
-    ball_1.velocity.y_vector += ball_1.acceleration.y_vector;
+    if (ball_1.acceleration.x_vector>0.01 || ball_1.acceleration.x_vector<-0.01){
+        ball_1.velocity.x_vector += ball_1.acceleration.x_vector;
+    }
+    if (ball_1.acceleration.y_vector>0.01 || ball_1.acceleration.y_vector<-0.01){
+        ball_1.velocity.y_vector += ball_1.acceleration.y_vector;
+    }
 }
 
 //function to add velocity to the placement of the ball
 function addVelocity(ball_1){
-    ball_1.centre.x_vector += ball_1.velocity.x_vector;
-    ball_1.centre.y_vector += ball_1.velocity.y_vector;
+    if ((ball_1.velocity.x_vector>0.01 || ball_1.velocity.x_vector<-0.01)&&ball_1.stationary == false){
+        ball_1.centre.x_vector += ball_1.velocity.x_vector;
+    }
+    if ((ball_1.velocity.y_vector>0.01 || ball_1.velocity.y_vector<-0.01)&&ball_1.stationary == false){
+        ball_1.centre.y_vector += ball_1.velocity.y_vector;
+    }
 }
 
 //function to check for friction zones
@@ -216,17 +251,49 @@ function checkEdges(ball_1){
     }
 }
 
-//function to check magnetism against balls currently moving
-function checkMagnets(ball_1, magnet_1){
-    let distance_x = magnet_1.centre.x_vector-ball_1.centre.x_vector;
-    let distance_y = magnet_1.centre.y_vector-ball_1.centre.y_vector;
+//function for checking magnetism in objects
+function magnetismCalc(object_1, object_2){
+    let distance_x = object_2.centre.x_vector-object_1.centre.x_vector;
+    let distance_y = object_2.centre.y_vector-object_1.centre.y_vector;
     //magnitude of distance to give a scalar number distance between two centres
     let distance_magnitude = Math.sqrt(distance_x**2+distance_y**2);
     let magnetInverseSquare = 1/(distance_magnitude**2);
-    let velocity_x = distance_x*magnetInverseSquare*magnet_1.magnetism;
-    let velocity_y = distance_y*magnetInverseSquare*magnet_1.magnetism;
-    ball_1.velocity.x_vector += velocity_x;
-    ball_1.velocity.y_vector += velocity_y;
+    if (object_1.pole === object_2.pole){
+        magnetInverseSquare *= -1;
+    }
+    let velocity_x = distance_x*magnetInverseSquare*object_1.magnetism*object_2.magnetism;
+    let velocity_y = distance_y*magnetInverseSquare*object_1.magnetism*object_2.magnetism;
+    let magneticVelocity = new Vector(velocity_x, velocity_y);
+    return magneticVelocity;
+}
+
+//function to check magnetism against balls currently moving
+function checkMagnets(ball_1, magnet_1){
+    if (ball_1.magnetic == true){
+        let magneticVelocity = magnetismCalc(ball_1, magnet_1);
+        if (magneticVelocity.x_vector>0.01 || magneticVelocity.x_vector<-0.01){
+            ball_1.velocity.x_vector += magneticVelocity.x_vector;
+        }
+        if (magneticVelocity.y_vector>0.01 || magneticVelocity.y_vector<-0.01){
+            ball_1.velocity.y_vector += magneticVelocity.y_vector;
+        }
+    }
+}
+
+//function to check two magnetic balls against each other
+function checkMagneticBalls(ball_1, ball_2){
+    if (ball_1.magnetic == true && ball_2.magnetic == true){
+        let magneticVelocity = magnetismCalc(ball_1, ball_2);
+        if (magneticVelocity.x_vector>0.01 || magneticVelocity.x_vector<-0.01){
+            ball_1.velocity.x_vector += magneticVelocity.x_vector;
+            ball_2.velocity.x_vector -= magneticVelocity.x_vector;
+                       
+        }
+        if (magneticVelocity.y_vector>0.01 || magneticVelocity.y_vector<-0.01){
+            ball_1.velocity.y_vector += magneticVelocity.y_vector;
+            ball_2.velocity.y_vector -= magneticVelocity.y_vector;
+        }
+    }
 }
 
 //group of functions to avoid code repetition
@@ -240,9 +307,9 @@ function functionGroup(ball_1){
     });
     addAcceleration(ball_1);
     addVelocity(ball_1);
+    
 }
 function mainLoop() {
-
     ctx.clearRect(0, 0, width, height);
     if (frictionSquareArray.length === 0){
         let Friction1 = new FrictionZone(0, 0, 0, 0, "green", "green", 0);
@@ -257,13 +324,18 @@ function mainLoop() {
         ball_1.drawBall();
         if (index !== BallArray.length-1){
             for(let num = index+1; num<BallArray.length; num++){
-                BallVectors(ball_1, BallArray[num]);
+                checkCollision(ball_1, BallArray[num]);
+                ballVectors(ball_1, BallArray[num]);
+                checkMagneticBalls(ball_1, BallArray[num]);
+                functionGroup(ball_1);
+                checkCollision(ball_1, BallArray[num]);
             }
-            functionGroup(ball_1);
         } else {
             functionGroup(ball_1);
         }
-        ball_1.speedDisplay();
+        if (ball_1.stationary == false){
+            ball_1.speedDisplay();
+        }
     });
     requestAnimationFrame(mainLoop);
 }
