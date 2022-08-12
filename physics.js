@@ -4,8 +4,8 @@ const PlayerBallArray = [];
 const FrictionSquareArray = [];
 const MagnetArray = [];
 const BlockArray = [];
+const CanvasArray = [];
 let friction = 0.000001;
-let scale = 2;
 let moveLeft = false;
 let moveRight = false;
 let moveDown = false;
@@ -29,11 +29,9 @@ class Vector{
         return ((this.x_vector*vector_2.x_vector)+(this.y_vector*vector_2.y_vector));
     }
 }
-let universalStart = new Vector(0,0);
-let scaledSize = new Vector(scale*width, scale*height);
 class Ball{
     constructor(xpoint, ypoint, radius, mass, velocityx, velocityy, accelerationScalar, magnetic, pole, magnetism,
-        stationary, player, outline, fill){
+        stationary, player, ghost, outline, fill){
         this.centre = new Vector(xpoint, ypoint);
         this.radius = radius;
         this.mass = mass;
@@ -58,6 +56,7 @@ class Ball{
         } else{
             this.canvasCentre = new Vector (0,0);
         }
+        this.ghost = ghost;
         BallArray.push(this);
     }
 
@@ -152,6 +151,27 @@ class Block {
     }
 
 }
+
+class Canvas {
+    constructor(xlength, ylength, outline, fill){
+        this.universalStart = new Vector(0, 0);
+        this.canvasStart = new Vector(0,0);
+        this.length = new Vector(xlength, ylength);
+        this.outline = outline;
+        this.fill = fill;
+        CanvasArray.push(this);
+    }
+    drawCanvas(){
+        ctx.beginPath();
+        ctx.rect(this.canvasStart.x_vector, this.canvasStart.y_vector, this.length.x_vector, this.length.y_vector);
+        ctx.strokestyle = this.outline;
+        ctx.stroke();
+        ctx.fillStyle = this.fill;
+        ctx.fill();
+        ctx.closePath();
+    }
+}
+
 function checkCollision (ball_1, ball_2){
     //distance between two centres in x and y directions
     let distance_x = ball_1.centre.x_vector-ball_2.centre.x_vector;
@@ -237,6 +257,10 @@ function ballVectors(ball_1, ball_2){
 function addAcceleration(ball_1){
     if (ball_1.accelerationVector.x_vector>0.01 || ball_1.accelerationVector.x_vector<-0.01){
         ball_1.velocity.x_vector += ball_1.accelerationVector.x_vector;
+        if (ball_1.player == true){
+            console.log ("velocity added to");
+        }
+        
     }
     if (ball_1.accelerationVector.y_vector>0.01 || ball_1.accelerationVector.y_vector<-0.01){
         ball_1.velocity.y_vector += ball_1.accelerationVector.y_vector;
@@ -247,6 +271,9 @@ function addAcceleration(ball_1){
 function addVelocity(ball_1){
     if ((ball_1.velocity.x_vector>0.01 || ball_1.velocity.x_vector<-0.01)&&ball_1.stationary == false){
         ball_1.centre.x_vector += ball_1.velocity.x_vector;
+        if (ball_1.player == true){
+            console.log ("space added to");
+        }
     }
     if ((ball_1.velocity.y_vector>0.01 || ball_1.velocity.y_vector<-0.01)&&ball_1.stationary == false){
         ball_1.centre.y_vector += ball_1.velocity.y_vector;
@@ -275,20 +302,20 @@ function checkEdges(ball_1){
     //checks that ball isn't past border of screen and reverses vector dependent on side it hits
     //also brings ball back to edge if it were to cross the border due to the small jumps the ball
     //actually makes to simulate movement
-    if (ball_1.centre.x_vector <= ball_1.radius || ball_1.centre.x_vector >= (scaledSize.x_vector-ball_1.radius)){
+    if (ball_1.centre.x_vector <= ball_1.radius || ball_1.centre.x_vector >= (CanvasArray[0].length.x_vector-ball_1.radius)){
         if (ball_1.centre.x_vector<=ball_1.radius){
             ball_1.centre.x_vector = ball_1.radius;
-        } else if (ball_1.centre.x_vector >= (scaledSize.x_vector-ball_1.radius)){
-            ball_1.centre.x_vector = scaledSize.x_vector - ball_1.radius;
+        } else if (ball_1.centre.x_vector >= (CanvasArray[0].length.x_vector-ball_1.radius)){
+            ball_1.centre.x_vector = CanvasArray[0].length.x_vector - ball_1.radius;
         }
         ball_1.velocity.x_vector = -1 * ball_1.velocity.x_vector;
     }
 
-    if (ball_1.centre.y_vector <= ball_1.radius || ball_1.centre.y_vector >= (scaledSize.y_vector-ball_1.radius)){
+    if (ball_1.centre.y_vector <= ball_1.radius || ball_1.centre.y_vector >= (CanvasArray[0].length.y_vector-ball_1.radius)){
         if (ball_1.centre.y_vector<=ball_1.radius){
             ball_1.centre.y_vector = ball_1.radius;
-        } else if (ball_1.centre.y_vector >= (scaledSize.y_vector-ball_1.radius)){
-            ball_1.centre.y_vector = scaledSize.y_vector - ball_1.radius;
+        } else if (ball_1.centre.y_vector >= (CanvasArray[0].length.y_vector-ball_1.radius)){
+            ball_1.centre.y_vector = CanvasArray[0].length.y_vector - ball_1.radius;
         }
         ball_1.velocity.y_vector = ball_1.velocity.y_vector * -1;
     }
@@ -388,15 +415,17 @@ function checkBlocks(ball_1, block_1){
 //group of functions to avoid code repetition
 function functionGroup(ball_1){
     checkEdges(ball_1);
-    FrictionSquareArray.forEach(square_1 => {
-        checkFriction(ball_1, square_1); 
-    });
-    MagnetArray.forEach(magnet_1 => {
-        checkMagnets(ball_1, magnet_1);
-    });
-    BlockArray.forEach(block_1 => {
-        checkBlocks(ball_1, block_1);
-    });
+    if (ball_1.ghost == false){
+        FrictionSquareArray.forEach(square_1 => {
+            checkFriction(ball_1, square_1); 
+        });
+        MagnetArray.forEach(magnet_1 => {
+            checkMagnets(ball_1, magnet_1);
+        });
+        BlockArray.forEach(block_1 => {
+            checkBlocks(ball_1, block_1);
+        });
+    }
     addAcceleration(ball_1);
     addVelocity(ball_1);    
 }
@@ -405,56 +434,46 @@ function playerControl(ball_1){
     canvas.addEventListener('keydown', function(key){
         if(key.code === "ArrowRight"){
             moveRight = true;
-            console.log("right key pressed");
+            console.log("right pressed");
         }
         if(key.code === "ArrowLeft"){
             moveLeft = true;
-            console.log("left key pressed");
         }
         if(key.code === "ArrowDown"){
             moveDown = true;
-            console.log("down key pressed");
         }
         if(key.code === "ArrowUp"){
             moveUp = true;
-            console.log("up key pressed");
         }
     });
     
     canvas.addEventListener('keyup', function(key){
         if(key.code === "ArrowRight"){
             moveRight = false;
-            console.log("right key unpressed");
         }
         if(key.code === "ArrowLeft"){
             moveLeft = false;
-            console.log("left key unpressed");
         }
         if(key.code === "ArrowDown"){
             moveDown = false;
-            console.log("down key unpressed");
         }
         if(key.code === "ArrowUp"){
             moveUp = false;
-            console.log("up key unpressed");
         }
     });
 
     if(moveRight == true){
         ball_1.accelerationVector.x_vector = ball_1.accelerationScalar;
-        console.log(ball_1.accelerationVector.x_vector);
+        console.log("acceleration added");
     }
     if(moveLeft == true){
         ball_1.accelerationVector.x_vector = -ball_1.accelerationScalar;
-        console.log(ball_1.accelerationVector.x_vector);
     }
     if(moveDown == true){
         ball_1.accelerationVector.y_vector = ball_1.accelerationScalar;
-        console.log(ball_1.accelerationVector.y_vector);
     }
     if(moveUp == true){
         ball_1.accelerationVector.y_vector = -ball_1.accelerationScalar;
-        console.log(ball_1.accelerationVector.y_vector);
     }
     if(moveRight == false && moveLeft == false){
         ball_1.accelerationVector.x_vector = 0;
@@ -496,26 +515,37 @@ function universalToCanvasFrictionZones(ball_1, square_1){
     square_1.drawSquare();
 }
 
-function universalToCanvasBorder(ball_1){
-    let distanceUpper = new Vector(ball_1.centre.x_vector-universalStart.x_vector, ball_1.centre.y_vector-universalStart.y_vector);
+function universalToCanvasBorder(ball_1, canvas_1){
+    let distanceUpper = new Vector(ball_1.centre.x_vector-canvas_1.universalStart.x_vector, ball_1.centre.y_vector-canvas_1.universalStart.y_vector);
     let canvasPointUpper = new Vector(ball_1.canvasCentre.x_vector-distanceUpper.x_vector, 
-        ball_1.canvasCentre.y_vector-distanceUpper.y_vector);
-    ctx.beginPath();
-    ctx.rect(canvasPointUpper.x_vector, canvasPointUpper.y_vector, scaledSize.x_vector, scaledSize.y_vector);
-    ctx.strokestyle = "black";
-    ctx.stroke();
-    ctx.fillStyle = "turquoise";
-    ctx.fill();
-    ctx.closePath();
-}
+    ball_1.canvasCentre.y_vector-distanceUpper.y_vector);
+    canvas_1.canvasStart.x_vector = canvasPointUpper.x_vector;
+    canvas_1.canvasStart.y_vector = canvasPointUpper.y_vector;
+    canvas_1.drawCanvas(); 
+}  
 
 function mainLoop() {    
-    ctx.clearRect(universalStart.x_vector, universalStart.y_vector, scaledSize.x_vector, scaledSize.y_vector);
+    if (CanvasArray.length == 0){
+        let defaultCanvas = new Canvas(0,0,1500,900, "black", "turquoise");
+    }
+    ctx.clearRect(CanvasArray[0].universalStart.x_vector, CanvasArray[0].universalStart.y_vector, 
+        CanvasArray[0].length.x_vector, CanvasArray[0].length.y_vector);
     if (FrictionSquareArray.length === 0){
         let Friction1 = new FrictionZone(0, 0, 0, 0, "green", "green", 0);
     }  
+    if (PlayerBallArray.length == 0 || PlayerBallArray.length >=2){
+        if (PlayerBallArray.length>1){
+            PlayerBallArray.forEach((ball_1) => {
+                ball_1.player = false;
+            });
+            PlayerBallArray.splice(0, PlayerBallArray.length);
+        }
+        let PlayerCamera = new Ball(100, 100, 0, 0.00001, 0, 0, 0.1, false, "/", 0, false, true, true, "black", "purple");
+    }
     PlayerBallArray.forEach((ball_1) => {
-        universalToCanvasBorder(ball_1);
+        CanvasArray.forEach((canvas_1) => {
+            universalToCanvasBorder(ball_1, canvas_1)
+        });
         MagnetArray.forEach((magnet_1) => {
             universalToCanvasMagnets(ball_1, magnet_1);
         });
@@ -532,6 +562,7 @@ function mainLoop() {
         });
         ball_1.drawBall();
     });
+    
     BallArray.forEach((ball_1, index) => {
         if (ball_1.stationary == true){
             ball_1.velocity.x_vector = 0;
@@ -542,18 +573,23 @@ function mainLoop() {
                 if (ball_1.player == true){
                     playerControl(ball_1);
                 }
-                checkCollision(ball_1, BallArray[num]);
-                ballVectors(ball_1, BallArray[num]);
-                checkMagneticBalls(ball_1, BallArray[num]);
+                if (ball_1.ghost == false && BallArray[num].ghost == false){
+                    checkCollision(ball_1, BallArray[num]);
+                    ballVectors(ball_1, BallArray[num]);
+                    checkMagneticBalls(ball_1, BallArray[num]);
+                }
             }
             functionGroup(ball_1);
         } else {
+            if (ball_1.player == true){
+                playerControl(ball_1);
+            }
             functionGroup(ball_1);
         }
-        if (ball_1.stationary == false){
+        if (ball_1.stationary == false && ball_1.ghost == false){
             ball_1.speedDisplay();
         }
     });
     requestAnimationFrame(mainLoop);
 }
-export { mainLoop, FrictionZone, Ball, Magnet, Block};
+export { mainLoop, FrictionZone, Ball, Magnet, Block, Canvas};
