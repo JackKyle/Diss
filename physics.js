@@ -5,6 +5,7 @@ const FrictionSquareArray = [];
 const MagnetArray = [];
 const BlockArray = [];
 const CanvasArray = [];
+const TeleportArray = [];
 let friction = 0.000001;
 let moveLeft = false;
 let moveRight = false;
@@ -172,6 +173,41 @@ class Canvas {
     }
 }
 
+class Teleporter {
+    constructor(xstart, ystart, xlength, ylength, xteleport, yteleport, outline, fill, circle){
+        this.start = new Vector (xstart, ystart);
+        this.canvasStart = new Vector (0,0);
+        this.length = new Vector(xlength, ylength);
+        this.teleportPoint = new Vector (xteleport, yteleport);
+        this.canvasTeleportPoint = new Vector(0,0);
+        this.outline = outline;
+        this.fill = fill;
+        this.circle = circle;
+        this.circleCentre = new Vector (this.start.x_vector+(xlength/2),this.start.y_vector+(ylength/2));
+        this.canvasCentre = new Vector (0,0);
+        if (xlength>ylength){
+            this.radius = ylength/5;
+        } else {
+            this.radius = xlength/5;
+        }
+        TeleportArray.push(this);
+    }
+    drawTeleporter(){
+        ctx.beginPath();
+        ctx.rect(this.canvasStart.x_vector, this.canvasStart.y_vector, this.length.x_vector, this.length.y_vector);
+        ctx.strokestyle = this.outline;
+        ctx.stroke();
+        ctx.fillStyle = this.fill;
+        ctx.fill();
+        ctx.closePath();
+        ctx.beginPath();
+        ctx.arc(this.canvasCentre.x_vector, this.canvasCentre.y_vector, this.radius, 0, 2*Math.PI);
+        ctx.fillStyle = this.circle;
+        ctx.fill();
+        ctx.closePath();
+    }
+}
+
 function checkCollision (ball_1, ball_2){
     //distance between two centres in x and y directions
     let distance_x = ball_1.centre.x_vector-ball_2.centre.x_vector;
@@ -256,11 +292,7 @@ function ballVectors(ball_1, ball_2){
 //function to add acceleration to the velocity
 function addAcceleration(ball_1){
     if (ball_1.accelerationVector.x_vector>0.01 || ball_1.accelerationVector.x_vector<-0.01){
-        ball_1.velocity.x_vector += ball_1.accelerationVector.x_vector;
-        if (ball_1.player == true){
-            console.log ("velocity added to");
-        }
-        
+        ball_1.velocity.x_vector += ball_1.accelerationVector.x_vector;    
     }
     if (ball_1.accelerationVector.y_vector>0.01 || ball_1.accelerationVector.y_vector<-0.01){
         ball_1.velocity.y_vector += ball_1.accelerationVector.y_vector;
@@ -271,9 +303,6 @@ function addAcceleration(ball_1){
 function addVelocity(ball_1){
     if ((ball_1.velocity.x_vector>0.01 || ball_1.velocity.x_vector<-0.01)&&ball_1.stationary == false){
         ball_1.centre.x_vector += ball_1.velocity.x_vector;
-        if (ball_1.player == true){
-            console.log ("space added to");
-        }
     }
     if ((ball_1.velocity.y_vector>0.01 || ball_1.velocity.y_vector<-0.01)&&ball_1.stationary == false){
         ball_1.centre.y_vector += ball_1.velocity.y_vector;
@@ -412,6 +441,20 @@ function checkBlocks(ball_1, block_1){
     }
 }
 
+//function to check for teleport zones
+function checkTeleport(ball_1, teleport_1){
+    //checks that the centre of the sphere (the point that would be touching the surface of the friction zone if ball
+    //is considered a 2d representation of a sphere) is within the coordinates of the zone and teleports the ball to the specified area
+    //if so
+    if ((ball_1.centre.x_vector>=teleport_1.start.x_vector&&ball_1.centre.x_vector<=
+        (teleport_1.start.x_vector+teleport_1.length.x_vector)) && 
+        (ball_1.centre.y_vector>=teleport_1.start.y_vector&&ball_1.centre.y_vector<=
+        (teleport_1.start.y_vector+teleport_1.length.y_vector))){
+            ball_1.centre.x_vector = teleport_1.teleportPoint.x_vector
+            ball_1.centre.y_vector = teleport_1.teleportPoint.y_vector
+    }
+}
+
 //group of functions to avoid code repetition
 function functionGroup(ball_1){
     checkEdges(ball_1);
@@ -425,6 +468,9 @@ function functionGroup(ball_1){
         BlockArray.forEach(block_1 => {
             checkBlocks(ball_1, block_1);
         });
+        TeleportArray.forEach(teleport_1 =>{
+            checkTeleport(ball_1, teleport_1);
+        })
     }
     addAcceleration(ball_1);
     addVelocity(ball_1);    
@@ -434,7 +480,6 @@ function playerControl(ball_1){
     canvas.addEventListener('keydown', function(key){
         if(key.code === "ArrowRight"){
             moveRight = true;
-            console.log("right pressed");
         }
         if(key.code === "ArrowLeft"){
             moveLeft = true;
@@ -464,7 +509,6 @@ function playerControl(ball_1){
 
     if(moveRight == true){
         ball_1.accelerationVector.x_vector = ball_1.accelerationScalar;
-        console.log("acceleration added");
     }
     if(moveLeft == true){
         ball_1.accelerationVector.x_vector = -ball_1.accelerationScalar;
@@ -488,7 +532,11 @@ function universalToCanvasBalls(ball_1, ball_2){
     let canvasPoint = new Vector(ball_1.canvasCentre.x_vector-distance.x_vector, ball_1.canvasCentre.y_vector-distance.y_vector);
     ball_2.canvasCentre.x_vector = canvasPoint.x_vector;
     ball_2.canvasCentre.y_vector = canvasPoint.y_vector;
-    ball_2.drawBall();
+    if ((((ball_2.canvasCentre.x_vector+ball_2.radius)>0)&&((ball_2.canvasCentre.x_vector-ball_2.radius)<width))
+    &&(((ball_2.canvasCentre.y_vector+ball_2.radius)>0)&&((ball_2.canvasCentre.y_vector-ball_2.radius)<height))){
+        ball_2.drawBall();
+    }
+
 }
 
 function universalToCanvasMagnets(ball_1, magnet_1){
@@ -496,7 +544,10 @@ function universalToCanvasMagnets(ball_1, magnet_1){
     let canvasPoint = new Vector(ball_1.canvasCentre.x_vector-distance.x_vector, ball_1.canvasCentre.y_vector-distance.y_vector);
     magnet_1.canvasCentre.x_vector = canvasPoint.x_vector;
     magnet_1.canvasCentre.y_vector = canvasPoint.y_vector;
-    magnet_1.drawMagnet();
+    if ((((magnet_1.canvasCentre.x_vector+magnet_1.radius)>0)&&((magnet_1.canvasCentre.x_vector-magnet_1.radius)<width))
+    &&(((magnet_1.canvasCentre.y_vector+magnet_1.radius)>0)&&((magnet_1.canvasCentre.y_vector-magnet_1.radius)<height))){
+        magnet_1.drawMagnet();
+    }
 }
 
 function universalToCanvasBlocks(ball_1, block_1){
@@ -504,7 +555,10 @@ function universalToCanvasBlocks(ball_1, block_1){
     let canvasPoint = new Vector(ball_1.canvasCentre.x_vector-distance.x_vector, ball_1.canvasCentre.y_vector-distance.y_vector);
     block_1.canvasStart.x_vector = canvasPoint.x_vector;
     block_1.canvasStart.y_vector = canvasPoint.y_vector;
-    block_1.drawBlock();
+    if ((((block_1.canvasStart.x_vector+block_1.length.x_vector)>0)&&((block_1.canvasStart.x_vector)<width))
+    &&(((block_1.canvasStart.y_vector+block_1.length.y_vector)>0)&&((block_1.canvasStart.y_vector)<height))){
+        block_1.drawBlock();
+    }
 }
 
 function universalToCanvasFrictionZones(ball_1, square_1){
@@ -512,7 +566,10 @@ function universalToCanvasFrictionZones(ball_1, square_1){
     let canvasPoint = new Vector(ball_1.canvasCentre.x_vector-distance.x_vector, ball_1.canvasCentre.y_vector-distance.y_vector);
     square_1.canvasStart.x_vector = canvasPoint.x_vector;
     square_1.canvasStart.y_vector = canvasPoint.y_vector;
-    square_1.drawSquare();
+    if ((((square_1.canvasStart.x_vector+square_1.length.x_vector)>0)&&((square_1.canvasStart.x_vector)<width))
+    &&(((square_1.canvasStart.y_vector+square_1.length.y_vector)>0)&&((square_1.canvasStart.y_vector)<height))){
+        square_1.drawSquare();
+    }
 }
 
 function universalToCanvasBorder(ball_1, canvas_1){
@@ -524,15 +581,30 @@ function universalToCanvasBorder(ball_1, canvas_1){
     canvas_1.drawCanvas(); 
 }  
 
+function universalToCanvasTeleporters(ball_1, teleport_1){
+    let distance = new Vector(ball_1.centre.x_vector-teleport_1.start.x_vector, ball_1.centre.y_vector-teleport_1.start.y_vector);
+    let canvasPoint = new Vector(ball_1.canvasCentre.x_vector-distance.x_vector, ball_1.canvasCentre.y_vector-distance.y_vector);
+    teleport_1.canvasStart.x_vector = canvasPoint.x_vector;
+    teleport_1.canvasStart.y_vector = canvasPoint.y_vector;
+    let distanceCentre = new Vector(ball_1.centre.x_vector-teleport_1.circleCentre.x_vector, 
+        ball_1.centre.y_vector-teleport_1.circleCentre.y_vector);
+    let canvasPointCentre = new Vector(ball_1.canvasCentre.x_vector-distanceCentre.x_vector, 
+        ball_1.canvasCentre.y_vector-distanceCentre.y_vector);
+    teleport_1.canvasCentre.x_vector = canvasPointCentre.x_vector;
+    teleport_1.canvasCentre.y_vector = canvasPointCentre.y_vector;
+    if ((((teleport_1.canvasStart.x_vector+teleport_1.length.x_vector)>0)&&((teleport_1.canvasStart.x_vector)<width))
+    &&(((teleport_1.canvasStart.y_vector+teleport_1.length.y_vector)>0)&&((teleport_1.canvasStart.y_vector)<height))){
+        teleport_1.drawTeleporter();
+        console.log("teleport drawn");
+    }
+}
+
 function mainLoop() {    
     if (CanvasArray.length == 0){
         let defaultCanvas = new Canvas(0,0,1500,900, "black", "turquoise");
     }
     ctx.clearRect(CanvasArray[0].universalStart.x_vector, CanvasArray[0].universalStart.y_vector, 
         CanvasArray[0].length.x_vector, CanvasArray[0].length.y_vector);
-    if (FrictionSquareArray.length === 0){
-        let Friction1 = new FrictionZone(0, 0, 0, 0, "green", "green", 0);
-    }  
     if (PlayerBallArray.length == 0 || PlayerBallArray.length >=2){
         if (PlayerBallArray.length>1){
             PlayerBallArray.forEach((ball_1) => {
@@ -546,11 +618,15 @@ function mainLoop() {
         CanvasArray.forEach((canvas_1) => {
             universalToCanvasBorder(ball_1, canvas_1)
         });
-        MagnetArray.forEach((magnet_1) => {
-            universalToCanvasMagnets(ball_1, magnet_1);
-        });
+        
         FrictionSquareArray.forEach((square_1) => {
             universalToCanvasFrictionZones(ball_1, square_1);
+        });
+        TeleportArray.forEach((teleport_1) => {
+            universalToCanvasTeleporters(ball_1, teleport_1);
+        })
+        MagnetArray.forEach((magnet_1) => {
+            universalToCanvasMagnets(ball_1, magnet_1);
         });
         BlockArray.forEach((block_1) => {
             universalToCanvasBlocks(ball_1, block_1);
@@ -592,4 +668,4 @@ function mainLoop() {
     });
     requestAnimationFrame(mainLoop);
 }
-export { mainLoop, FrictionZone, Ball, Magnet, Block, Canvas};
+export { mainLoop, FrictionZone, Ball, Magnet, Block, Canvas, Teleporter};

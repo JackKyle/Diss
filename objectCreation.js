@@ -1,4 +1,4 @@
-import { mainLoop, FrictionZone, Ball, Magnet, Block, Canvas} from './physics.js';
+import { mainLoop, FrictionZone, Ball, Magnet, Block, Canvas, Teleporter} from './physics.js';
 
 let defaultCanvas = new Canvas(1500,3000, "black", "orange");
 
@@ -12,11 +12,13 @@ let magnet1 = new Magnet (550, 20, 20, 2, "North", "black", "white");
 
 let magnet2 = new Magnet (950, 880, 20, 2, "South", "black", "white");
 
+let Teleporter1 = new Teleporter (500, 500, 150, 150, 100, 100, "black", "gold", "silver"); 
+
 let Ball1 = new Ball(110, 450, 20, 100, 5, 0, 0, true, "South", 2, true, false, false, "black", "red");
 
-let Ball2 = new Ball(500, 450, 20, 100, -5, 0, 1, true, "South", 3, false, true, false, "black", "yellow");
+let Ball2 = new Ball(500, 450, 20, 100, -5, 0, 1, true, "South", 3, false, false, false, "black", "yellow");
 
-let Ball3 = new Ball(100, 700, 30, 50, 2, -1, 1, true, "North", 3, false, true, false, "black", "pink");
+let Ball3 = new Ball(100, 700, 30, 50, 2, -1, 1, true, "North", 3, false, false, false, "black", "pink");
 
 let Ball4 = new Ball(780, 100, 20, 50, 0, -4, 1, false, "/", 0, false, false, false, "black", "black");
 
