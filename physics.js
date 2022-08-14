@@ -60,17 +60,6 @@ class Ball{
         this.ghost = ghost;
         BallArray.push(this);
     }
-
-    drawBall(){
-        ctx.beginPath();
-        ctx.arc(this.canvasCentre.x_vector, this.canvasCentre.y_vector, this.radius, 0, 2*Math.PI);
-        ctx.strokeStyle = this.outline;
-        ctx.stroke();
-        ctx.fillStyle = this.fill;
-        ctx.fill();
-        ctx.closePath();
-    }
-
     //displaying the current acceleration and the velocity of the ball
     speedDisplay(){
         ctx.beginPath();
@@ -98,16 +87,6 @@ class FrictionZone{
         this.friction = friction;
         FrictionSquareArray.push(this);
     }
-
-    drawSquare(){
-        ctx.beginPath();
-        ctx.rect(this.canvasStart.x_vector, this.canvasStart.y_vector, this.length.x_vector, this.length.y_vector);
-        ctx.strokeStyle = this.outline;
-        ctx.stroke();
-        ctx.fillStyle = this.fill;
-        ctx.fill();
-        ctx.closePath();
-    }
 }
 
 class Magnet{
@@ -121,15 +100,6 @@ class Magnet{
         this.fill = fill;
         MagnetArray.push(this);
     }
-    drawMagnet(){
-        ctx.beginPath();
-        ctx.arc(this.canvasCentre.x_vector, this.canvasCentre.y_vector, this.radius, 0, 2*Math.PI);
-        ctx.strokeStyle = this.outline;
-        ctx.stroke();
-        ctx.fillStyle = this.fill;
-        ctx.fill();
-        ctx.closePath();
-    }
 }
 
 class Block {
@@ -140,15 +110,6 @@ class Block {
         this.outline = outline;
         this.fill = fill;
         BlockArray.push(this);
-    }
-    drawBlock(){
-        ctx.beginPath();
-        ctx.rect(this.canvasStart.x_vector, this.canvasStart.y_vector, this.length.x_vector, this.length.y_vector);
-        ctx.strokestyle = this.outline;
-        ctx.stroke();
-        ctx.fillStyle = this.fill;
-        ctx.fill();
-        ctx.closePath();
     }
 
 }
@@ -161,15 +122,6 @@ class Canvas {
         this.outline = outline;
         this.fill = fill;
         CanvasArray.push(this);
-    }
-    drawCanvas(){
-        ctx.beginPath();
-        ctx.rect(this.canvasStart.x_vector, this.canvasStart.y_vector, this.length.x_vector, this.length.y_vector);
-        ctx.strokestyle = this.outline;
-        ctx.stroke();
-        ctx.fillStyle = this.fill;
-        ctx.fill();
-        ctx.closePath();
     }
 }
 
@@ -193,13 +145,7 @@ class Teleporter {
         TeleportArray.push(this);
     }
     drawTeleporter(){
-        ctx.beginPath();
-        ctx.rect(this.canvasStart.x_vector, this.canvasStart.y_vector, this.length.x_vector, this.length.y_vector);
-        ctx.strokestyle = this.outline;
-        ctx.stroke();
-        ctx.fillStyle = this.fill;
-        ctx.fill();
-        ctx.closePath();
+        drawRectangle(this);
         ctx.beginPath();
         ctx.arc(this.canvasCentre.x_vector, this.canvasCentre.y_vector, this.radius, 0, 2*Math.PI);
         ctx.fillStyle = this.circle;
@@ -208,6 +154,25 @@ class Teleporter {
     }
 }
 
+function drawRectangle (object_1){
+    ctx.beginPath();
+    ctx.rect(object_1.canvasStart.x_vector, object_1.canvasStart.y_vector, object_1.length.x_vector, object_1.length.y_vector);
+    ctx.strokestyle = object_1.outline;
+    ctx.stroke();
+    ctx.fillStyle = object_1.fill;
+    ctx.fill();
+    ctx.closePath();
+}
+
+function drawCircle (object_1){
+    ctx.beginPath();
+    ctx.arc(object_1.canvasCentre.x_vector, object_1.canvasCentre.y_vector, object_1.radius, 0, 2*Math.PI);
+    ctx.strokeStyle = object_1.outline;
+    ctx.stroke();
+    ctx.fillStyle = object_1.fill;
+    ctx.fill();
+    ctx.closePath();
+}
 function checkCollision (ball_1, ball_2){
     //distance between two centres in x and y directions
     let distance_x = ball_1.centre.x_vector-ball_2.centre.x_vector;
@@ -370,10 +335,13 @@ function magnetismCalc(object_1, object_2){
 function checkMagnets(ball_1, magnet_1){
     if (ball_1.magnetic == true){
         let magneticVelocity = magnetismCalc(ball_1, magnet_1);
-        if ((magneticVelocity.x_vector>0.01 || magneticVelocity.x_vector<-0.01)&&ball_1.stationary == false){
+        //mass of ball taken into consideration for calculation of velocity
+        magneticVelocity.x_vector *= 1/ball_1.mass;
+        magneticVelocity.y_vector *= 1/ball_1.mass;
+        if ((magneticVelocity.x_vector>0.0001 || magneticVelocity.x_vector<-0.0001)&&ball_1.stationary == false){
             ball_1.velocity.x_vector += magneticVelocity.x_vector;
         }
-        if ((magneticVelocity.y_vector>0.01 || magneticVelocity.y_vector<-0.01)&&ball_1.stationary == false){
+        if ((magneticVelocity.y_vector>0.0001 || magneticVelocity.y_vector<-0.0001)&&ball_1.stationary == false){
             ball_1.velocity.y_vector += magneticVelocity.y_vector;
         }
     }
@@ -383,13 +351,37 @@ function checkMagnets(ball_1, magnet_1){
 function checkMagneticBalls(ball_1, ball_2){
     if (ball_1.magnetic == true && ball_2.magnetic == true){
         let magneticVelocity = magnetismCalc(ball_1, ball_2);
-        if (magneticVelocity.x_vector>0.01 || magneticVelocity.x_vector<-0.01){
-            ball_1.velocity.x_vector += magneticVelocity.x_vector;
-            ball_2.velocity.x_vector -= magneticVelocity.x_vector;       
+        let magneticVelocity_1 = new Vector (magneticVelocity.x_vector*(ball_2.mass/(ball_1.mass+ball_2.mass)),
+        magneticVelocity.y_vector*(ball_2.mass/(ball_1.mass+ball_2.mass)));
+        let magneticVelocity_2 = new Vector (magneticVelocity.x_vector*(ball_1.mass/(ball_1.mass+ball_2.mass)),
+        magneticVelocity.y_vector*(ball_2.mass/(ball_1.mass+ball_2.mass)));
+        if (magneticVelocity_1.x_vector>0.001 || magneticVelocity_1.x_vector<-0.001){
+            if (ball_2.stationary == false){
+                ball_1.velocity.x_vector += magneticVelocity_1.x_vector;
+            } else {
+                ball_1.velocity.x_vector += magneticVelocity.x_vector;
+            }
         }
-        if (magneticVelocity.y_vector>0.01 || magneticVelocity.y_vector<-0.01){
-            ball_1.velocity.y_vector += magneticVelocity.y_vector;
-            ball_2.velocity.y_vector -= magneticVelocity.y_vector;
+        if (magneticVelocity_2.x_vector>0.001 || magneticVelocity_2.x_vector<-0.001){
+            if (ball_1.stationary == false){
+                ball_2.velocity.x_vector -= magneticVelocity_2.x_vector;
+            } else {
+                ball_2.velocity.x_vector -= magneticVelocity.x_vector;
+            }     
+        }
+        if (magneticVelocity_1.y_vector>0.001 || magneticVelocity_1.y_vector<-0.001){
+            if (ball_2.stationary == false){
+                ball_1.velocity.y_vector += magneticVelocity_1.y_vector;
+            } else {
+                ball_1.velocity.y_vector += magneticVelocity.y_vector;
+            }
+        }
+        if (magneticVelocity_2.y_vector>0.001 || magneticVelocity_2.y_vector<-0.001){
+            if (ball_1.stationary == false){
+                ball_2.velocity.y_vector -= magneticVelocity_2.y_vector;
+            } else {
+                ball_2.velocity.y_vector -= magneticVelocity.y_vector;
+            }
         }
         if (ball_1.stationary == true){
             ball_1.velocity.x_vector = 0;
@@ -534,7 +526,7 @@ function universalToCanvasBalls(ball_1, ball_2){
     ball_2.canvasCentre.y_vector = canvasPoint.y_vector;
     if ((((ball_2.canvasCentre.x_vector+ball_2.radius)>0)&&((ball_2.canvasCentre.x_vector-ball_2.radius)<width))
     &&(((ball_2.canvasCentre.y_vector+ball_2.radius)>0)&&((ball_2.canvasCentre.y_vector-ball_2.radius)<height))){
-        ball_2.drawBall();
+        drawCircle(ball_2)
     }
 
 }
@@ -546,7 +538,7 @@ function universalToCanvasMagnets(ball_1, magnet_1){
     magnet_1.canvasCentre.y_vector = canvasPoint.y_vector;
     if ((((magnet_1.canvasCentre.x_vector+magnet_1.radius)>0)&&((magnet_1.canvasCentre.x_vector-magnet_1.radius)<width))
     &&(((magnet_1.canvasCentre.y_vector+magnet_1.radius)>0)&&((magnet_1.canvasCentre.y_vector-magnet_1.radius)<height))){
-        magnet_1.drawMagnet();
+        drawCircle(magnet_1);
     }
 }
 
@@ -557,7 +549,7 @@ function universalToCanvasBlocks(ball_1, block_1){
     block_1.canvasStart.y_vector = canvasPoint.y_vector;
     if ((((block_1.canvasStart.x_vector+block_1.length.x_vector)>0)&&((block_1.canvasStart.x_vector)<width))
     &&(((block_1.canvasStart.y_vector+block_1.length.y_vector)>0)&&((block_1.canvasStart.y_vector)<height))){
-        block_1.drawBlock();
+        drawRectangle(block_1);
     }
 }
 
@@ -568,7 +560,7 @@ function universalToCanvasFrictionZones(ball_1, square_1){
     square_1.canvasStart.y_vector = canvasPoint.y_vector;
     if ((((square_1.canvasStart.x_vector+square_1.length.x_vector)>0)&&((square_1.canvasStart.x_vector)<width))
     &&(((square_1.canvasStart.y_vector+square_1.length.y_vector)>0)&&((square_1.canvasStart.y_vector)<height))){
-        square_1.drawSquare();
+        drawRectangle(square_1);
     }
 }
 
@@ -578,7 +570,7 @@ function universalToCanvasBorder(ball_1, canvas_1){
     ball_1.canvasCentre.y_vector-distanceUpper.y_vector);
     canvas_1.canvasStart.x_vector = canvasPointUpper.x_vector;
     canvas_1.canvasStart.y_vector = canvasPointUpper.y_vector;
-    canvas_1.drawCanvas(); 
+    drawRectangle(canvas_1);
 }  
 
 function universalToCanvasTeleporters(ball_1, teleport_1){
@@ -595,7 +587,6 @@ function universalToCanvasTeleporters(ball_1, teleport_1){
     if ((((teleport_1.canvasStart.x_vector+teleport_1.length.x_vector)>0)&&((teleport_1.canvasStart.x_vector)<width))
     &&(((teleport_1.canvasStart.y_vector+teleport_1.length.y_vector)>0)&&((teleport_1.canvasStart.y_vector)<height))){
         teleport_1.drawTeleporter();
-        console.log("teleport drawn");
     }
 }
 
@@ -636,7 +627,7 @@ function mainLoop() {
                 universalToCanvasBalls(ball_1, ball_2);
             }
         });
-        ball_1.drawBall();
+        drawCircle(ball_1);
     });
     
     BallArray.forEach((ball_1, index) => {
