@@ -1,6 +1,6 @@
 import { mainLoop, FrictionZone, Ball, Magnet, Block, Canvas, Teleporter} from './physics.js';
 
-let defaultCanvas = new Canvas(1500,3000, "black", "orange");
+let defaultCanvas = new Canvas(0, 0, 1500,3000, 0.01, "black", "orange");
 
 let Friction1 = new FrictionZone(500, 350, 100, 100, "black", "purple", 0.05);
 

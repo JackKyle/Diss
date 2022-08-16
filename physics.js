@@ -6,7 +6,7 @@ const MagnetArray = [];
 const BlockArray = [];
 const CanvasArray = [];
 const TeleportArray = [];
-let friction = 0.000001;
+let friction = 0.001;
 let moveLeft = false;
 let moveRight = false;
 let moveDown = false;
@@ -31,12 +31,29 @@ class Vector{
     }
 }
 class Ball{
-    constructor(xpoint, ypoint, radius, mass, velocityx, velocityy, accelerationScalar, magnetic, pole, magnetism,
-        stationary, player, ghost, outline, fill){
+    constructor(xpoint, ypoint, radius, mass, velocityx, velocityy, maxvelocity, accelerationScalar, magnetic, pole, magnetism,
+        stationary, player, ghost, outline, fill, frictionCheck){
+        if (xpoint<radius){
+            xpoint = radius;
+        }
+        if (ypoint<radius){
+            xpoint = radius;
+        }
         this.centre = new Vector(xpoint, ypoint);
-        this.radius = radius;
-        this.mass = mass;
+        if (radius<=0){
+            this.radius = 1;
+        } else {
+            this.radius = radius;
+        }
+        if (mass<=0){
+            this.mass = 0.00001;
+        } else{
+            this.mass = mass;
+        }
         this.magnetic = magnetic;
+        if (magnetism<0){
+            magnetism = 0;
+        }
         if (this.magnetic == true){
             this.pole = pole;    
             this.magnetism = magnetism;
@@ -45,9 +62,19 @@ class Ball{
             this.magnetism = 0;
         }
         this.velocity = new Vector(velocityx,velocityy);
+        this.maxvelocity = maxvelocity;
+        if (accelerationScalar <0){
+            accelerationScalar *= -1;
+        }
         this.accelerationScalar = accelerationScalar;
         this.accelerationVector = new Vector(0,0);
+        if (stationary!== true && stationary!== false){
+            stationary = false;
+        }
         this.stationary = stationary;
+        if (player!== true && player!== false){
+            player = false;
+        }
         this.player = player;
         this.outline = outline;
         this.fill = fill;
@@ -57,7 +84,14 @@ class Ball{
         } else{
             this.canvasCentre = new Vector (0,0);
         }
+        if (ghost!== true && ghost!== false){
+            ghost = false;
+        }
         this.ghost = ghost;
+        if (frictionCheck !== false){
+            frictionCheck = false;
+        }
+        this.frictionCheck = frictionCheck
         BallArray.push(this);
     }
     //displaying the current acceleration and the velocity of the ball
@@ -79,11 +113,26 @@ class Ball{
 
 class FrictionZone{
     constructor(upperxpoint, upperypoint, xlength, ylength, outline, fill, friction){
+        if (upperxpoint<0){
+            upperxpoint = 0;
+        }
+        if (upperypoint<0){
+            upperypoint = 0;
+        }
         this.upperpoint = new Vector (upperxpoint, upperypoint);
         this.canvasStart = new Vector (0,0);
+        if (xlength<=0){
+            xlength = 1;
+        }
+        if (ylength<=0){
+            ylength = 1;
+        }
         this.length = new Vector (xlength, ylength);
         this.outline = outline;
         this.fill = fill;
+        if (friction>1){
+            friction = 1;
+        }
         this.friction = friction;
         FrictionSquareArray.push(this);
     }
@@ -91,9 +140,23 @@ class FrictionZone{
 
 class Magnet{
     constructor(xpoint, ypoint, radius, magnetism, pole, outline, fill){
+        if (xpoint<radius){
+            xpoint = radius;
+        }
+        if (ypoint<radius){
+            xpoint = radius;
+        }
         this.centre = new Vector (xpoint, ypoint);
         this.canvasCentre = new Vector(0,0);
+        if (radius<=0){
+            this.radius = 1;
+        } else {
+            this.radius = radius;
+        }
         this.radius = radius;
+        if (magnetism<0){
+            magnetism = 0;
+        }
         this.magnetism = magnetism;
         this.pole = pole;
         this.outline = outline;
@@ -104,8 +167,20 @@ class Magnet{
 
 class Block {
     constructor(xstart, ystart, xlength, ylength, outline, fill){
+        if (xstart<0){
+            xstart = 0;
+        }
+        if (ystart<0){
+            ystart = 0;
+        }
         this.start = new Vector (xstart, ystart);
         this.canvasStart = new Vector (0,0);
+        if (xlength<=0){
+            xlength = 1;
+        }
+        if (ylength<=0){
+            ylength = 1;
+        }
         this.length = new Vector (xlength, ylength);
         this.outline = outline;
         this.fill = fill;
@@ -115,10 +190,20 @@ class Block {
 }
 
 class Canvas {
-    constructor(xlength, ylength, outline, fill){
-        this.universalStart = new Vector(0, 0);
+    constructor(xstart, ystart, xlength, ylength, friction, outline, fill){
+        this.universalStart = new Vector(xstart, ystart);
         this.canvasStart = new Vector(0,0);
+        if (xlength<=0){
+            xlength = 1;
+        }
+        if (ylength<=0){
+            ylength = 1;
+        }
         this.length = new Vector(xlength, ylength);
+        if (friction<0){
+            friction = 0;
+        }
+        this.friction = friction;
         this.outline = outline;
         this.fill = fill;
         CanvasArray.push(this);
@@ -257,10 +342,24 @@ function ballVectors(ball_1, ball_2){
 //function to add acceleration to the velocity
 function addAcceleration(ball_1){
     if (ball_1.accelerationVector.x_vector>0.01 || ball_1.accelerationVector.x_vector<-0.01){
-        ball_1.velocity.x_vector += ball_1.accelerationVector.x_vector;    
+        if (ball_1.velocity.x_vector>5){
+            ball_1.velocity.x_vector = 5;
+        } else if (ball_1.velocity.x_vector<-5){
+            ball_1.velocity.x_vector = -5;
+        }
+        if (ball_1.velocity.x_vector<=5&&ball_1.velocity.x_vector>=-5){
+            ball_1.velocity.x_vector += ball_1.accelerationVector.x_vector;
+        }    
     }
     if (ball_1.accelerationVector.y_vector>0.01 || ball_1.accelerationVector.y_vector<-0.01){
-        ball_1.velocity.y_vector += ball_1.accelerationVector.y_vector;
+        if (ball_1.velocity.y_vector>5){
+            ball_1.velocity.y_vector = 5;
+        } else if (ball_1.velocity.y_vector<-5){
+            ball_1.velocity.y_vector = -5;
+        }
+        if (ball_1.velocity.y_vector<=5&&ball_1.velocity.y_vector>=-5){
+            ball_1.velocity.y_vector += ball_1.accelerationVector.y_vector;
+        }
     }
 }
 
@@ -279,37 +378,44 @@ function checkFriction(ball_1, square_1){
     //checks that the centre of the ball (the point that would be touching the surface of the friction zone if ball
     //is considered a 2d representation of a sphere) is within the coordinates of the zone and applies friction of
     //zone to the ball
-    if ((ball_1.centre.x_vector>=square_1.upperpoint.x_vector&&ball_1.centre.x_vector<=
-        (square_1.upperpoint.x_vector+square_1.length.x_vector)) && 
-        (ball_1.centre.y_vector>=square_1.upperpoint.y_vector&&ball_1.centre.y_vector<=
-        (square_1.upperpoint.y_vector+square_1.length.y_vector))){
-            ball_1.velocity.x_vector *= 1 - square_1.friction;
-            ball_1.velocity.y_vector *= 1 - square_1.friction;
-    } else {
-        ball_1.velocity.x_vector *= 1 - friction;
-        ball_1.velocity.y_vector *= 1 - friction;
+    if (ball_1.frictionCheck == false){
+        if ((ball_1.centre.x_vector>=square_1.upperpoint.x_vector&&ball_1.centre.x_vector<=
+            (square_1.upperpoint.x_vector+square_1.length.x_vector)) && 
+            (ball_1.centre.y_vector>=square_1.upperpoint.y_vector&&ball_1.centre.y_vector<=
+            (square_1.upperpoint.y_vector+square_1.length.y_vector))){
+                ball_1.velocity.x_vector *= 1 - square_1.friction;
+                ball_1.velocity.y_vector *= 1 - square_1.friction;
+                console.log(ball_1.radius, square_1.friction);
+                ball_1.frictionCheck = true;
+        }
     }
 }
 
 //function to check if the ball is against the edges 
-function checkEdges(ball_1){
+function checkEdges(ball_1, canvas_1){
     //checks that ball isn't past border of screen and reverses vector dependent on side it hits
     //also brings ball back to edge if it were to cross the border due to the small jumps the ball
     //actually makes to simulate movement
-    if (ball_1.centre.x_vector <= ball_1.radius || ball_1.centre.x_vector >= (CanvasArray[0].length.x_vector-ball_1.radius)){
+    if (((ball_1.centre.x_vector-ball_1.radius) <= canvas_1.universalStart.x_vector ||
+     ball_1.centre.x_vector >= (canvas_1.universalStart.x_vector + canvas_1.length.x_vector-ball_1.radius))&&
+     ((ball_1.centre.y_vector-ball_1.radius)>=(canvas_1.universalStart.y_vector-(canvas_1.length.y_vector/20)) && 
+     (ball_1.centre.y_vector+ball_1.radius)<=(canvas_1.universalStart.y_vector+canvas_1.length.y_vector+(canvas_1.length.y_vector/20)))){
         if (ball_1.centre.x_vector<=ball_1.radius){
-            ball_1.centre.x_vector = ball_1.radius;
-        } else if (ball_1.centre.x_vector >= (CanvasArray[0].length.x_vector-ball_1.radius)){
-            ball_1.centre.x_vector = CanvasArray[0].length.x_vector - ball_1.radius;
+            ball_1.centre.x_vector = canvas_1.universalStart.x_vector+ball_1.radius;
+        } else if (ball_1.centre.x_vector >= (canvas_1.length.x_vector-ball_1.radius)){
+            ball_1.centre.x_vector = canvas_1.length.x_vector - ball_1.radius;
         }
         ball_1.velocity.x_vector = -1 * ball_1.velocity.x_vector;
     }
 
-    if (ball_1.centre.y_vector <= ball_1.radius || ball_1.centre.y_vector >= (CanvasArray[0].length.y_vector-ball_1.radius)){
+    if (((ball_1.centre.y_vector-ball_1.radius) <= canvas_1.universalStart.y_vector ||
+    ball_1.centre.y_vector >= (canvas_1.universalStart.y_vector + canvas_1.length.y_vector-ball_1.radius))&&
+    ((ball_1.centre.x_vector-ball_1.radius)>=(canvas_1.universalStart.x_vector-(canvas_1.length.x_vector/20)) && 
+    (ball_1.centre.x_vector+ball_1.radius)<=(canvas_1.universalStart.x_vector+canvas_1.length.x_vector+(canvas_1.length.x_vector/20)))){
         if (ball_1.centre.y_vector<=ball_1.radius){
             ball_1.centre.y_vector = ball_1.radius;
-        } else if (ball_1.centre.y_vector >= (CanvasArray[0].length.y_vector-ball_1.radius)){
-            ball_1.centre.y_vector = CanvasArray[0].length.y_vector - ball_1.radius;
+        } else if (ball_1.centre.y_vector >= (canvas_1.length.y_vector-ball_1.radius)){
+            ball_1.centre.y_vector = canvas_1.length.y_vector - ball_1.radius;
         }
         ball_1.velocity.y_vector = ball_1.velocity.y_vector * -1;
     }
@@ -338,10 +444,10 @@ function checkMagnets(ball_1, magnet_1){
         //mass of ball taken into consideration for calculation of velocity
         magneticVelocity.x_vector *= 1/ball_1.mass;
         magneticVelocity.y_vector *= 1/ball_1.mass;
-        if ((magneticVelocity.x_vector>0.0001 || magneticVelocity.x_vector<-0.0001)&&ball_1.stationary == false){
+        if ((magneticVelocity.x_vector>0.0005 || magneticVelocity.x_vector<-0.0005)&&ball_1.stationary == false){
             ball_1.velocity.x_vector += magneticVelocity.x_vector;
         }
-        if ((magneticVelocity.y_vector>0.0001 || magneticVelocity.y_vector<-0.0001)&&ball_1.stationary == false){
+        if ((magneticVelocity.y_vector>0.0005 || magneticVelocity.y_vector<-0.0005)&&ball_1.stationary == false){
             ball_1.velocity.y_vector += magneticVelocity.y_vector;
         }
     }
@@ -399,34 +505,28 @@ function checkBlocks(ball_1, block_1){
     if ((((ball_1.centre.x_vector+ball_1.radius)>=block_1.start.x_vector)
     &&(ball_1.centre.x_vector+ball_1.radius)<=(block_1.start.x_vector+(block_1.length.x_vector/10)))
     && ball_1.velocity.x_vector>0
-    &&(((ball_1.centre.y_vector+ball_1.radius)>block_1.start.y_vector)
-    &&(ball_1.centre.y_vector-ball_1.radius)<(block_1.start.y_vector+block_1.length.y_vector))){
+    &&(((ball_1.centre.y_vector+ball_1.radius)>=block_1.start.y_vector)
+    &&(ball_1.centre.y_vector-ball_1.radius)<=(block_1.start.y_vector+block_1.length.y_vector))){
         ball_1.centre.x_vector = block_1.start.x_vector-ball_1.radius;
         ball_1.velocity.x_vector *= -1;
-    }
-    //right side of block
-    if ((((ball_1.centre.x_vector-ball_1.radius)>=(block_1.start.x_vector+(block_1.length.x_vector*(9/10))))
+    } else if ((((ball_1.centre.x_vector-ball_1.radius)>=(block_1.start.x_vector+(block_1.length.x_vector*(9/10))))
     &&(ball_1.centre.x_vector-ball_1.radius)<=(block_1.start.x_vector+block_1.length.x_vector))
     && ball_1.velocity.x_vector<0
-    &&(((ball_1.centre.y_vector+ball_1.radius)>block_1.start.y_vector)
-    &&(ball_1.centre.y_vector-ball_1.radius)<(block_1.start.y_vector+block_1.length.y_vector))){
+    &&(((ball_1.centre.y_vector+ball_1.radius)>=block_1.start.y_vector)
+    &&(ball_1.centre.y_vector-ball_1.radius)<=(block_1.start.y_vector+block_1.length.y_vector))){
         ball_1.centre.x_vector = block_1.start.x_vector+block_1.length.x_vector+ball_1.radius;
         ball_1.velocity.x_vector *= -1;
-    }
-    //top of block
-    if ((((ball_1.centre.y_vector+ball_1.radius)>=block_1.start.y_vector)
+    } else if ((((ball_1.centre.y_vector+ball_1.radius)>=block_1.start.y_vector)
     &&(ball_1.centre.y_vector+ball_1.radius)<=(block_1.start.y_vector+(block_1.length.y_vector/10)))
     && ball_1.velocity.y_vector>0
-    &&(((ball_1.centre.x_vector+ball_1.radius)>block_1.start.x_vector)
-    &&(ball_1.centre.x_vector-ball_1.radius)<(block_1.start.x_vector+block_1.length.x_vector))){
+    &&(((ball_1.centre.x_vector+ball_1.radius)>=block_1.start.x_vector)
+    &&(ball_1.centre.x_vector-ball_1.radius)<=(block_1.start.x_vector+block_1.length.x_vector))){
         ball_1.centre.y_vector = block_1.start.y_vector-ball_1.radius;
         ball_1.velocity.y_vector *= -1;
-    }
-    //bottom of block
-    if ((((ball_1.centre.y_vector-ball_1.radius)>=(block_1.start.y_vector+(block_1.length.y_vector*(9/10))))
+    } else if ((((ball_1.centre.y_vector-ball_1.radius)>=(block_1.start.y_vector+(block_1.length.y_vector*(9/10))))
     &&(ball_1.centre.y_vector-ball_1.radius)<=(block_1.start.y_vector+block_1.length.y_vector))
     && ball_1.velocity.y_vector<0
-    &&(((ball_1.centre.x_vector+ball_1.radius)>block_1.start.x_vector)
+    &&(((ball_1.centre.x_vector+ball_1.radius)>=block_1.start.x_vector)
     &&(ball_1.centre.x_vector-ball_1.radius)<(block_1.start.x_vector+block_1.length.x_vector))){
         ball_1.centre.y_vector = block_1.start.y_vector+block_1.length.y_vector+ball_1.radius;
         ball_1.velocity.y_vector *= -1;
@@ -435,7 +535,7 @@ function checkBlocks(ball_1, block_1){
 
 //function to check for teleport zones
 function checkTeleport(ball_1, teleport_1){
-    //checks that the centre of the sphere (the point that would be touching the surface of the friction zone if ball
+    //checks that the centre of the sphere (the point that would be touching the surface of the teleport zone if ball
     //is considered a 2d representation of a sphere) is within the coordinates of the zone and teleports the ball to the specified area
     //if so
     if ((ball_1.centre.x_vector>=teleport_1.start.x_vector&&ball_1.centre.x_vector<=
@@ -449,14 +549,19 @@ function checkTeleport(ball_1, teleport_1){
 
 //group of functions to avoid code repetition
 function functionGroup(ball_1){
-    checkEdges(ball_1);
+    CanvasArray.forEach(canvas_1 => {
+        checkEdges(ball_1, canvas_1);
+    });
     if (ball_1.ghost == false){
+        ball_1.frictionCheck = false;
         FrictionSquareArray.forEach(square_1 => {
             checkFriction(ball_1, square_1); 
         });
-        MagnetArray.forEach(magnet_1 => {
-            checkMagnets(ball_1, magnet_1);
-        });
+        if (ball_1.magnetic == true){
+            MagnetArray.forEach(magnet_1 => {
+                checkMagnets(ball_1, magnet_1);
+            });
+        }
         BlockArray.forEach(block_1 => {
             checkBlocks(ball_1, block_1);
         });
@@ -465,6 +570,11 @@ function functionGroup(ball_1){
         })
     }
     addAcceleration(ball_1);
+    if (ball_1.frictionCheck == false){
+        ball_1.velocity.x_vector *= 1-CanvasArray[0].friction;
+        ball_1.velocity.y_vector *= 1-CanvasArray[0].friction;
+        ball_1.frictionCheck = true;
+    }
     addVelocity(ball_1);    
 }
 
@@ -603,7 +713,7 @@ function mainLoop() {
             });
             PlayerBallArray.splice(0, PlayerBallArray.length);
         }
-        let PlayerCamera = new Ball(100, 100, 0, 0.00001, 0, 0, 0.1, false, "/", 0, false, true, true, "black", "purple");
+        let PlayerCamera = new Ball(100, 100, 0, 0.00001, 0, 0, 5, 0.1, false, "/", 0, false, true, true, CanvasArray[0].fill, CanvasArray[0].fill);
     }
     PlayerBallArray.forEach((ball_1) => {
         CanvasArray.forEach((canvas_1) => {
@@ -646,12 +756,16 @@ function mainLoop() {
                     checkMagneticBalls(ball_1, BallArray[num]);
                 }
             }
-            functionGroup(ball_1);
+            if (ball_1.stationary == false){
+                functionGroup(ball_1);
+            }
         } else {
             if (ball_1.player == true){
                 playerControl(ball_1);
             }
-            functionGroup(ball_1);
+            if (ball_1.stationary == false){
+                functionGroup(ball_1);
+            }
         }
         if (ball_1.stationary == false && ball_1.ghost == false){
             ball_1.speedDisplay();
