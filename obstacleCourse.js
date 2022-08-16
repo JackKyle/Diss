@@ -1,16 +1,18 @@
 import { mainLoop, FrictionZone, Ball, Magnet, Block, Canvas, Teleporter} from './physics.js';
 
-let defaultCanvas = new Canvas(0, 0, 1500,1500, 0.1, "black", "orange");
+let defaultCanvas = new Canvas(0, 0, 1500,1500, 0.1, "black", "grey");
 
-let Friction1 = new FrictionZone(1300, 0, 100, 300, "black", "purple", 0.5);
+let Friction1 = new FrictionZone(1300, 200, 100, 100, "black", "purple", 0.5);
 
-let Friction2 = new FrictionZone(900, 1200, 100, 300, "black", "purple", 0.5);
+let Friction2 = new FrictionZone(900, 1200, 100, 100, "black", "purple", 0.5);
 
-let Friction3 = new FrictionZone(600, 300, 300, 100, "black", "purple", 0.5);
+let Friction3 = new FrictionZone(700, 300, 100, 100, "black", "purple", 0.5);
 
-let Friction4 = new FrictionZone(400, 1400, 300, 100, "black", "purple", 0.5);
+let Friction4 = new FrictionZone(300, 1400, 100, 100, "black", "purple", 0.5);
 
-let Friction5 = new FrictionZone(0, 300, 200, 1200, "black", "purple", 0);
+let Friction5 = new FrictionZone(300, 400, 100, 1000, "black", "orange", -0.005);
+
+let Friction6 = new FrictionZone(0, 300, 200, 1200, "black", "pink", 0);
 
 let block1 = new Block(0, 200, 300, 100, "black", "Silver");
 
@@ -96,34 +98,34 @@ let Teleporter11 = new Teleporter (1000, 1400, 100, 100, 1350, 250, "black", "go
 
 let Teleporter12 = new Teleporter (1000, 300, 100, 1000, 950, 1350, "black", "gold", "silver");
 
-let Teleporter13 = new Teleporter (500, 300, 100, 1000, 700, 350, "black", "gold", "silver");
+let Teleporter13 = new Teleporter (500, 300, 100, 1000, 750, 350, "black", "gold", "silver");
 
 let Teleporter14 = new Teleporter (300, 300, 100, 100, 550, 1450, "black", "gold", "silver");
 
 let Teleporter15 = new Teleporter (200, 400, 100, 100, 100, 350, "black", "gold", "silver");
 
-let Ball1 = new Ball(100, 100, 20, 10, 0, 0, 5, 1, true, "South", 4, false, true, false, "black", "red", "false");
+let Ball1 = new Ball(100, 100, 20, 10, 0, 0, 5, 1, true, "South", 4, false, true, false, "black", "red", false);
 
-let Ball2 = new Ball(930, 1170, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "red", "false");
+let Ball2 = new Ball(930, 1170, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "turquoise", false);
 
-let Ball3 = new Ball(970, 1070, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "red", "false");
+let Ball3 = new Ball(970, 1070, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "turquoise", false);
 
-let Ball4 = new Ball(930, 970, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "red", "false");
+let Ball4 = new Ball(930, 970, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "turquoise", false);
 
-let Ball5 = new Ball(970, 870, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "red", "false");
+let Ball5 = new Ball(970, 870, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "turquoise", false);
 
-let Ball6 = new Ball(930, 770, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "red", "false");
+let Ball6 = new Ball(930, 770, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "turquoise", false);
 
-let Ball7 = new Ball(970, 670, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "red", "false");
+let Ball7 = new Ball(970, 670, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "turquoise", false);
 
-let Ball8 = new Ball(930, 570, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "red", "false");
+let Ball8 = new Ball(930, 570, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "turquoise", false);
 
-let Ball9 = new Ball(970, 470, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "red", "false");
+let Ball9 = new Ball(970, 470, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "turquoise", false);
 
-let Ball14 = new Ball(670, 650, 30, 20, 0, 0, 5, 1, true, "South", 3, true, false, false, "black", "red", "false");
+let Ball14 = new Ball(670, 650, 30, 20, 0, 0, 5, 1, true, "South", 3, true, false, false, "black", "turquoise", false);
 
-let Ball15 = new Ball(670, 1050, 30, 20, 0, 0, 5, 1, true, "South", 3, true, false, false, "black", "red", "false");
+let Ball15 = new Ball(670, 1050, 30, 20, 0, 0, 5, 1, true, "South", 3, true, false, false, "black", "turquoise", false);
 
-let Ball16 = new Ball(100, 350, 30, 20, -3, 5, 5, 1, false, "/", 0, false, false, false, "black", "red", "false");
+let Ball16 = new Ball(100, 350, 30, 10, -3, 5, 5, 1, false, "/", 0, false, false, false, "black", "red", false);
 
 requestAnimationFrame(mainLoop);

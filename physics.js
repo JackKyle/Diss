@@ -1,4 +1,4 @@
-import { ctx, width, height } from './engineConfig.js';
+import { canvas, ctx, width, height } from './engineConfig.js';
 const BallArray = [];
 const PlayerBallArray = [];
 const FrictionSquareArray = [];
@@ -593,22 +593,23 @@ function playerControl(ball_1){
             moveUp = true;
         }
     });
+    if (moveRight == true || moveLeft == true || moveDown == true || moveUp == true){
+        canvas.addEventListener('keyup', function(key){
+            if(key.code === "ArrowRight"){
+                moveRight = false;
+            }
+            if(key.code === "ArrowLeft"){
+                moveLeft = false;
+            }
+            if(key.code === "ArrowDown"){
+                moveDown = false;
+            }
+            if(key.code === "ArrowUp"){
+                moveUp = false;
+            }
+        });
+    }
     
-    canvas.addEventListener('keyup', function(key){
-        if(key.code === "ArrowRight"){
-            moveRight = false;
-        }
-        if(key.code === "ArrowLeft"){
-            moveLeft = false;
-        }
-        if(key.code === "ArrowDown"){
-            moveDown = false;
-        }
-        if(key.code === "ArrowUp"){
-            moveUp = false;
-        }
-    });
-
     if(moveRight == true){
         ball_1.accelerationVector.x_vector = ball_1.accelerationScalar;
     }
@@ -767,9 +768,9 @@ function mainLoop() {
                 functionGroup(ball_1);
             }
         }
-        if (ball_1.stationary == false && ball_1.ghost == false){
-            ball_1.speedDisplay();
-        }
+        //if (ball_1.stationary == false && ball_1.ghost == false){
+            //ball_1.speedDisplay();
+        //}
     });
     requestAnimationFrame(mainLoop);
 }
