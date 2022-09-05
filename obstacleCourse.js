@@ -10,8 +10,6 @@ let Friction2 = new FrictionZone(700, 1300, 100, 100, "black", "purple", 0.5);
 
 let Friction3 = new FrictionZone(300, 300, 100, 100, "black", "purple", 0.5);
 
-let Friction4 = new FrictionZone(300, 3400, 100, 100, "black", "purple", 0.5);
-
 let Friction5 = new FrictionZone(300, 400, 100, 1000, "black", "orange", -0.001);
 
 let Friction6 = new FrictionZone(0, 300, 200, 1200, "black", "pink", 0.001);
@@ -60,11 +58,11 @@ let block20 = new Block(200, 300, 100, 300, "black", "Silver");
 
 
 
-let magnet1 = new Magnet (1150, 350, 20, 30, "North", "black", "white");
+let magnet1 = new Magnet (1150, 350, 20, 1000, "North", "black", "white");
 
-let magnet2 = new Magnet (1150, 750, 20, 30, "North", "black", "white");
+let magnet2 = new Magnet (1150, 750, 20, 1000, "North", "black", "white");
 
-let magnet3 = new Magnet (1150, 1150, 20, 30, "North", "black", "white");
+let magnet3 = new Magnet (1150, 1150, 20, 1000, "North", "black", "white");
 
 
 
@@ -86,7 +84,7 @@ let Teleporter15 = new Teleporter (200, 1300, 100, 100, 100, 350, "black", "gold
 
 
 
-let Ball1 = new Ball(100, 100, 20, 10, 0, 0, 5, 1, true, "South", 4, false, true, false, "black", "red", false);
+let Ball1 = new Ball(100, 100, 20, 10, 0, 0, 5, 1, true, "South", 40, false, true, false, "black", "red", false);
 
 let Ball2 = new Ball(930, 1170, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "turquoise", false);
 
@@ -104,9 +102,9 @@ let Ball8 = new Ball(930, 570, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, f
 
 let Ball9 = new Ball(970, 470, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "turquoise", false);
 
-let Ball10 = new Ball(670, 650, 30, 20, 0, 0, 5, 1, true, "South", 4, true, false, false, "black", "turquoise", false);
+let Ball10 = new Ball(670, 650, 30, 20, 0, 0, 5, 1, true, "South", 40, true, false, false, "black", "turquoise", false);
 
-let Ball11 = new Ball(670, 1050, 30, 20, 0, 0, 5, 1, true, "South", 4, true, false, false, "black", "turquoise", false);
+let Ball11 = new Ball(670, 1050, 30, 20, 0, 0, 5, 1, true, "South", 40, true, false, false, "black", "turquoise", false);
 
 let Ball12 = new Ball(100, 350, 30, 10, -3, 5, 5, 1, false, "/", 0, false, false, false, "black", "red", false);
 
