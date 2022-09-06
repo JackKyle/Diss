@@ -17,9 +17,9 @@ let moveUp = false;
 //vector class used for storing x and y directions and coordinates for variables in classes and objects
 class Vector{
     //constructor for vector class
-    constructor(x_vector, y_vector){
-        this.x_vector = x_vector;
-        this.y_vector = y_vector;
+    constructor(xvector, yvector){
+        this.x_vector = xvector;
+        this.y_vector = yvector;
     }   
     //method to get magnitude of variable
     magnitude(){
@@ -31,21 +31,51 @@ class Vector{
     }
 }
 
+class Circle{
+    constructor (xpoint, ypoint, radius, outline, fill){
+        //setting centre as vector so that both x and y positions can be held 
+        this.centre = new Vector(xpoint,ypoint);
+        this.radius = radius;
+        //sets canvas centre as 0,0 for default as will be corrected based on player/camera ball
+        this.canvasCentre = new Vector(0,0);
+        this.outline = outline;
+        this.fill = fill;
+    }
+}
+
+class Rectangle{
+    constructor (xstart,ystart,xlength,ylength, outline, fill){
+        //start stored in vector as has x and y components
+        this.start = new Vector(xstart,ystart);
+        //if statement to set default length as at least 1
+        if (xlength<=0){
+            xlength = 1;
+        }
+        if (ylength<=0){
+            ylength = 1;
+        }
+        //length stored in vector as has x and y components
+        this.length = new Vector (xlength,ylength);
+        //sets canvas start as 0,0 for default as will be corrected based on player/camera ball
+        this.canvasStart = new Vector(0,0);
+        this.outline = outline;
+        this.fill = fill;
+    }
+}
+
 //ball class used for creation of ball objects
-class Ball{
+class Ball extends Circle{
     //constructor used to construct ball object, with corrections for any potential incorrect entries in construction of ball
-    constructor(xpoint, ypoint, radius, mass, velocityx, velocityy, maxvelocity, accelerationScalar, magnetic, pole, magnetism,
-        stationary, player, ghost, outline, fill, frictionCheck){
-        //setting centre as vector so that both x and y positions can be held
-        this.centre = new Vector(xpoint, ypoint);
+    constructor(xpoint, ypoint, radius, mass, velocityx, velocityy, maxVelocity, accelerationScalar, magnetic, pole, magnetism,
+        stationary, player, ghost, outline, fill){
         //sets radius as 1 so ball is visible if the radius entred is less than or equal to 0 unless the ball is a ghost property 
         if (radius<=0 && ghost == false){
-            this.radius = 1;
+            radius = 1;
         } else if (radius<0&&ghost==true) {
-            this.radius = 0;
-        } else {
-            this.radius = radius
-        }
+            radius = 0;
+        } 
+        //super used to set all required variables of circular object from parent constructor
+        super(xpoint, ypoint, radius, outline, fill);
         //if statement to catch if mass is less than or equal to 0, negative values are impossible
         //and a value of 0 will cause problems with collision resolution
         if (mass<=0){
@@ -72,7 +102,7 @@ class Ball{
         }
         //sets velocity as vector object so it can contain x and y components
         this.velocity = new Vector(velocityx,velocityy);
-        this.maxvelocity = maxvelocity;
+        this.maxVelocity = maxVelocity;
         //sets acceleration scalar to positive of value entered if negative value entered
         if (accelerationScalar <0){
             accelerationScalar *= -1;
@@ -90,49 +120,30 @@ class Ball{
             player = false;
         }
         this.player = player;
-        this.outline = outline;
-        this.fill = fill;
         //if statement to correctly set camera for the ball when player and adds to player array
         if (this.player == true){
-            this.canvasCentre = new Vector (width/2,height/2);
+            this.canvasCentre.x_vector = (width/2);
+            this.canvasCentre.y_vector = (height/2);
             PlayerBallArray.push(this);
-        } else{
-            this.canvasCentre = new Vector (0,0);
-        }
+        } 
         //if statement to ensure ghost is true or false
         if (ghost!== true && ghost!== false){
             ghost = false;
         }
         this.ghost = ghost;
         //sets frictioncheck to false if not
-        if (frictionCheck !== false){
-            frictionCheck = false;
-        }
-        this.frictionCheck = frictionCheck
+        this.frictionCheck = false;
         //adds object to ball array
         BallArray.push(this);
     }
 }
 
 //friction zone class for creation of friction zone object
-class FrictionZone{
+class FrictionZone extends Rectangle{
     //constructor used to create friction zone object with potential corrections for properties
-    constructor(upperxpoint, upperypoint, xlength, ylength, outline, fill, friction){
-        //sets upper point x and y coordinates to vector object
-        this.upperpoint = new Vector (upperxpoint, upperypoint);
-        //sets drawing coordinates to 0,0 as default
-        this.canvasStart = new Vector (0,0);
-        //if statement to set length to at least 1 for each direction
-        if (xlength<=0){
-            xlength = 1;
-        }
-        if (ylength<=0){
-            ylength = 1;
-        }
-        //sets length values to vector for x and y components
-        this.length = new Vector (xlength, ylength);
-        this.outline = outline;
-        this.fill = fill;
+    constructor(xstart, ystart, xlength, ylength, outline, fill, friction){
+        //super used to set all required variables of rectangular object from parent constructor
+        super(xstart,ystart,xlength,ylength, outline, fill);
         //if statement so that friction value can not be greater than 1
         if (friction>1){
             friction = 1;
@@ -144,52 +155,32 @@ class FrictionZone{
 }
 
 //magnet class for creation of magnet objects
-class Magnet{
+class Magnet extends Circle{
     //constructor used to create magnet objects with potential corrections if required for properties
     constructor(xpoint, ypoint, radius, magnetism, pole, outline, fill){
-        //sets centre values in vector as there are x and y components
-        this.centre = new Vector (xpoint, ypoint);
-        //sets canvas centre as 0,0 for default as will be corrected based on player/camera ball
-        this.canvasCentre = new Vector(0,0);
         //if statement to stop radius being 0 or less
         if (radius<=0){
-            this.radius = 1;
-        } else {
-            this.radius = radius;
-        }
-        this.radius = radius;
+            radius = 1;
+        } 
+        //super used to set all required variables of circular object from parent constructor
+        super(xpoint,ypoint,radius,outline,fill);
         //if statement to stop magnetism being less than 0
         if (magnetism<0){
             magnetism = 0;
         }
         this.magnetism = magnetism;
         this.pole = pole;
-        this.outline = outline;
-        this.fill = fill;
         //adds magnet object to magnet array
         MagnetArray.push(this);
     }
 }
 
 //block class for creation of block object 
-class Block {
+class Block extends Rectangle{
     //constructor used to create block objects with potential corrections
     constructor(xstart, ystart, xlength, ylength, outline, fill){
-        //vector object used to hold starting points for x and y coordinates
-        this.start = new Vector (xstart, ystart);
-        //canvas start set as 0,0 by default before being changed to centre round player/camera
-        this.canvasStart = new Vector (0,0);
-        //if statement to stop length being less than 0 for x and y
-        if (xlength<=0){
-            xlength = 1;
-        }
-        if (ylength<=0){
-            ylength = 1;
-        }
-        //length values stored in vector due to x and y coordinates
-        this.length = new Vector (xlength, ylength);
-        this.outline = outline;
-        this.fill = fill;
+        //super used to set all required variables of rectangular object from parent constructor
+        super(xstart,ystart,xlength,ylength, outline, fill);
         //block added to block array
         BlockArray.push(this);
     }
@@ -197,56 +188,31 @@ class Block {
 }
 
 //canvas class used to construct canvas objects
-class Canvas {
+class Canvas extends Rectangle{
     //constructor used to create canvas object with potential corrections
     constructor(xstart, ystart, xlength, ylength, friction, outline, fill){
-        //canvas start set as vector with x and y coordinates
-        this.universalStart = new Vector(xstart, ystart);
+        //super used to set all required variables of rectangular object from parent constructor
+        super(xstart,ystart,xlength,ylength, outline, fill);
         //canvas start set as 0,0 by default before being changed to centre round player/camera
-        this.canvasStart = new Vector(0,0);
-        //if statement so length of canvas is not 0 or less
-        if (xlength<=0){
-            xlength = 1;
-        }
-        if (ylength<=0){
-            ylength = 1;
-        }
-        //length set as vector due to having x and y coordinates
-        this.length = new Vector(xlength, ylength);
         if (friction>1){
             friction = 1;
         }
         this.friction = friction;
-        this.outline = outline;
-        this.fill = fill;
         //canvas added to array for access
         CanvasArray.push(this);
     }
 }
 
 //teleporter class to construct teleporter objects
-class Teleporter {
+class Teleporter extends Rectangle{
     //constructor method to create teleporter object with potential corrections
     constructor(xstart, ystart, xlength, ylength, xteleport, yteleport, outline, fill, circle){
-        //start point set as vector to hold x and y coordinates
-        this.start = new Vector (xstart, ystart);
-        //canvas start set as 0,0 by default before being changed to centre round player/camera
-        this.canvasStart = new Vector (0,0);
-        //ensure length of at least 1 for both directions
-        if (xlength<=0){
-            xlength = 1;
-        }
-        if (ylength<=0){
-            ylength = 1;
-        }
-        //length held as vector as it has x and y component
-        this.length = new Vector(xlength, ylength);
+        //super used to set all required variables of rectangular object from parent constructor
+        super(xstart,ystart,xlength,ylength, outline, fill);
         //teleport point held as vector with x and y component
         this.teleportPoint = new Vector (xteleport, yteleport);
         //canvas point set as 0,0 by default before being corrected for player/camera
         this.canvasTeleportPoint = new Vector(0,0);
-        this.outline = outline;
-        this.fill = fill;
         this.circle = circle;
         //circle centre set as vector with x and y components
         this.circleCentre = new Vector (this.start.x_vector+(xlength/2),this.start.y_vector+(ylength/2));
@@ -299,17 +265,17 @@ function checkCollision (ball_1, ball_2){
     let distance_x = ball_1.centre.x_vector-ball_2.centre.x_vector;
     let distance_y = ball_1.centre.y_vector-ball_2.centre.y_vector;
     //magnitude of distance to give a scalar number distance between two centres
-    let distance_magnitude = Math.sqrt(distance_x**2+distance_y**2);
-    if (ball_1.radius+ball_2.radius>distance_magnitude){
+    let distanceMagnitude = Math.sqrt(distance_x**2+distance_y**2);
+    if (ball_1.radius+ball_2.radius>distanceMagnitude){
         //overlap between balls (if 0 then no overlap)
-        let diff = ball_1.radius+ball_2.radius - distance_magnitude;
+        let difference = ball_1.radius+ball_2.radius - distanceMagnitude;
         //calculating amount of distance each ball must be moved to make them no longer overlap but still touch
         //calculated by taking the total distance in each plane and dividing it by the total distance magnitude and multiplying 
         //it by the overlap divided by two so that it takes the fact they are each moving half the distance into account
         //each is then added to ball 1 and subtracted from ball 2 in order to ensure each ball moves an equal amount 
         //from the other, producing no overlap in the end
-        let move_x = (distance_x/distance_magnitude)*(diff/2);
-        let move_y = (distance_y/distance_magnitude)*(diff/2);
+        let move_x = (distance_x/distanceMagnitude)*(difference/2);
+        let move_y = (distance_y/distanceMagnitude)*(difference/2);
         //if statement to check that the balls only move if they aren't stationary
         if (ball_1.stationary == false && ball_2.stationary == false){
             ball_1.centre.x_vector += move_x;
@@ -332,8 +298,8 @@ function ballVectors(ball_1, ball_2){
     let distance_x = ball_1.centre.x_vector-ball_2.centre.x_vector;
     let distance_y = ball_1.centre.y_vector-ball_2.centre.y_vector;
     //magnitude of distance to give a scalar number distance between two centres
-    let distance_magnitude = Math.sqrt(distance_x**2+distance_y**2);
-    if (ball_1.radius+ball_2.radius>=distance_magnitude){
+    let distanceMagnitude = Math.sqrt(distance_x**2+distance_y**2);
+    if (ball_1.radius+ball_2.radius>=distanceMagnitude){
         //normal vector of collision found from taking centre of circle 1 from centre of circle 2
         let normalVector = new Vector(ball_2.centre.x_vector - ball_1.centre.x_vector, 
         ball_2.centre.y_vector - ball_1.centre.y_vector);
@@ -342,9 +308,9 @@ function ballVectors(ball_1, ball_2){
         normalVector.y_vector/normalVector.magnitude());
         //get unit tangent vector of collision 
         let unitTangentVector = new Vector(unitNormalVector.y_vector*-1, unitNormalVector.x_vector);
-        //get initial ball 1 normal direction vector by taking dot product of ball's velocity and that of the unit normal vector
+        //get initial ball 1 normal direction velocity by taking dot product of ball's velocity and that of the unit normal vector
         let initialBall1Normal = ball_1.velocity.dotproduct(unitNormalVector);
-        //get initial ball 1 tangent direction vector by taking dot product of ball's velocity and that of unit tangent vector
+        //get initial ball 1 tangent direction velocity by taking dot product of ball's velocity and that of unit tangent vector
         let ball1Tangent = ball_1.velocity.dotproduct(unitTangentVector);
         let initialBall2Normal = ball_2.velocity.dotproduct(unitNormalVector);
         let ball2Tangent = ball_2.velocity.dotproduct(unitTangentVector);
@@ -383,12 +349,12 @@ function addAcceleration(ball_1){
     if (ball_1.accelerationVector.x_vector>0.01 || ball_1.accelerationVector.x_vector<-0.01){
         //if statement so that acceleration is added when the velocity is below max velocity
         if (ball_1.accelerationVector.x_vector>0){
-            if (ball_1.velocity.x_vector<ball_1.maxvelocity){
+            if (ball_1.velocity.x_vector<ball_1.maxVelocity){
             ball_1.velocity.x_vector += ball_1.accelerationVector.x_vector;
             }
         }
         if (ball_1.accelerationVector.x_vector<0){
-            if (ball_1.velocity.x_vector>-1*ball_1.maxvelocity){
+            if (ball_1.velocity.x_vector>-1*ball_1.maxVelocity){
             ball_1.velocity.x_vector += ball_1.accelerationVector.x_vector;
             }
         }  
@@ -397,12 +363,12 @@ function addAcceleration(ball_1){
     if (ball_1.accelerationVector.y_vector>0.01 || ball_1.accelerationVector.y_vector<-0.01){
         //if statement so that acceleration is added when the velocity is below max velocity
         if (ball_1.accelerationVector.y_vector>0){
-            if (ball_1.velocity.y_vector<ball_1.maxvelocity){
+            if (ball_1.velocity.y_vector<ball_1.maxVelocity){
             ball_1.velocity.y_vector += ball_1.accelerationVector.y_vector;
             }
         }
         if (ball_1.accelerationVector.y_vector<0){
-            if (ball_1.velocity.y_vector>-1*ball_1.maxvelocity){
+            if (ball_1.velocity.y_vector>-1*ball_1.maxVelocity){
             ball_1.velocity.y_vector += ball_1.accelerationVector.y_vector;
             }
         }
@@ -417,19 +383,19 @@ function addVelocity(ball_1){
 }
 
 //function to check for friction zones
-function checkFriction(ball_1, square_1){
+function checkFriction(ball_1, friction_1){
     //only checks friction zone if the friction check is false 
     if (ball_1.frictionCheck == false){
         //checks that the centre of the ball (the point that would be touching the surface of the friction zone if ball
         //is considered a 2d representation of a sphere) is within the coordinates of the zone and applies friction of
         //zone to the ball
-        if ((ball_1.centre.x_vector>=square_1.upperpoint.x_vector&&ball_1.centre.x_vector<=
-            (square_1.upperpoint.x_vector+square_1.length.x_vector)) && 
-            (ball_1.centre.y_vector>=square_1.upperpoint.y_vector&&ball_1.centre.y_vector<=
-            (square_1.upperpoint.y_vector+square_1.length.y_vector))){
+        if ((ball_1.centre.x_vector>=friction_1.start.x_vector&&ball_1.centre.x_vector<=
+            (friction_1.start.x_vector+friction_1.length.x_vector)) && 
+            (ball_1.centre.y_vector>=friction_1.start.y_vector&&ball_1.centre.y_vector<=
+            (friction_1.start.y_vector+friction_1.length.y_vector))){
             //reduces velocity with friction factor
-            ball_1.velocity.x_vector *= 1 - square_1.friction;
-            ball_1.velocity.y_vector *= 1 - square_1.friction;
+            ball_1.velocity.x_vector *= 1 - friction_1.friction;
+            ball_1.velocity.y_vector *= 1 - friction_1.friction;
             //sets friction check as true for this loop for this ball as ball has already had friction calculations applied
             ball_1.frictionCheck = true;
         }
@@ -441,10 +407,10 @@ function checkEdges(ball_1, canvas_1){
     //checks that ball isn't past border of screen and reverses vector dependent on side it hits
     //also brings ball back to edge if it were to cross the border due to the small jumps the ball
     //actually makes to simulate movement
-    if (((ball_1.centre.x_vector-ball_1.radius) <= canvas_1.universalStart.x_vector ||
-     ball_1.centre.x_vector >= (canvas_1.universalStart.x_vector + canvas_1.length.x_vector-ball_1.radius))){
+    if (((ball_1.centre.x_vector-ball_1.radius) <= canvas_1.start.x_vector ||
+     ball_1.centre.x_vector >= (canvas_1.start.x_vector + canvas_1.length.x_vector-ball_1.radius))){
         if (ball_1.centre.x_vector<=ball_1.radius){
-            ball_1.centre.x_vector = canvas_1.universalStart.x_vector+ball_1.radius;
+            ball_1.centre.x_vector = canvas_1.start.x_vector+ball_1.radius;
         } else if (ball_1.centre.x_vector >= (canvas_1.length.x_vector-ball_1.radius)){
             ball_1.centre.x_vector = canvas_1.length.x_vector - ball_1.radius;
         }
@@ -453,8 +419,8 @@ function checkEdges(ball_1, canvas_1){
     //checks that ball isn't past border of screen and reverses vector dependent on side it hits
     //also brings ball back to edge if it were to cross the border due to the small jumps the ball
     //actually makes to simulate movement
-    if (((ball_1.centre.y_vector-ball_1.radius) <= canvas_1.universalStart.y_vector ||
-    ball_1.centre.y_vector >= (canvas_1.universalStart.y_vector + canvas_1.length.y_vector-ball_1.radius))){
+    if (((ball_1.centre.y_vector-ball_1.radius) <= canvas_1.start.y_vector ||
+    ball_1.centre.y_vector >= (canvas_1.start.y_vector + canvas_1.length.y_vector-ball_1.radius))){
         if (ball_1.centre.y_vector<=ball_1.radius){
             ball_1.centre.y_vector = ball_1.radius;
         } else if (ball_1.centre.y_vector >= (canvas_1.length.y_vector-ball_1.radius)){
@@ -470,25 +436,25 @@ function magnetismCalc(object_1, object_2){
     let distance_x = object_2.centre.x_vector-object_1.centre.x_vector;
     let distance_y = object_2.centre.y_vector-object_1.centre.y_vector;
     //magnitude of distance to give a scalar number distance between two centres
-    let distance_magnitude = Math.sqrt(distance_x**2+distance_y**2);
+    let distanceMagnitude = Math.sqrt(distance_x**2+distance_y**2);
     //magnetic inverse square given as 1/distance^2 to have distance between magnetic objects
     //affect value of magnetic velocities
-    let magnetInverseSquare = 1/(distance_magnitude**2);
+    let magnetInverseSquare = 1/(distanceMagnitude**2);
     if (object_1.pole === object_2.pole){
         //multiplies value by -1 so that balls repel if poles are the same
         magnetInverseSquare *= -1;
     }
-    let signCheck_X = 1;
-    let signCheck_Y = 1;
+    let signCheck_x = 1;
+    let signCheck_y = 1;
     if (distance_x<0){
-        signCheck_X *= -1;
+        signCheck_x *= -1;
     }
     if (distance_y<0){
-        signCheck_Y *=-1;
+        signCheck_y *=-1;
     }
     //magnetic velocity is a vector to hold x and y components 
-    let magneticVelocity = new Vector(signCheck_X*magnetInverseSquare*object_1.magnetism*object_2.magnetism,
-        signCheck_Y*magnetInverseSquare*object_1.magnetism*object_2.magnetism);
+    let magneticVelocity = new Vector(signCheck_x*magnetInverseSquare*object_1.magnetism*object_2.magnetism,
+        signCheck_y*magnetInverseSquare*object_1.magnetism*object_2.magnetism);
     //magnetic velocity returned to other methods for use in calculations between 2 balls or ball and magnet
     return magneticVelocity;
 }
@@ -719,87 +685,38 @@ function playerControl(ball_1){
 
 //function that will take the distance of each ball from the player/camera ball and move it appropriately in the 
 //canvas coordinates
-function universalToCanvasBalls(ball_1, ball_2){
+function universalToCanvasCircles(ball_1, object_2){
     //distance between ball centres taken in actual coordinates
-    let distance = new Vector(ball_1.centre.x_vector-ball_2.centre.x_vector, ball_1.centre.y_vector-ball_2.centre.y_vector);
+    let distance = new Vector(ball_1.centre.x_vector-object_2.centre.x_vector, ball_1.centre.y_vector-object_2.centre.y_vector);
     //canvas point is new vector that will get the coordinates for where ball 2 will be placed compared to ball 1
     let canvasPoint = new Vector(ball_1.canvasCentre.x_vector-distance.x_vector, ball_1.canvasCentre.y_vector-distance.y_vector);
     //ball 2's points now set as canvas points calculated as above
-    ball_2.canvasCentre.x_vector = canvasPoint.x_vector;
-    ball_2.canvasCentre.y_vector = canvasPoint.y_vector;
+    object_2.canvasCentre.x_vector = canvasPoint.x_vector;
+    object_2.canvasCentre.y_vector = canvasPoint.y_vector;
     //if statement to ensure ball is only drawn if it could appear on screen
-    if ((((ball_2.canvasCentre.x_vector+ball_2.radius)>0)&&((ball_2.canvasCentre.x_vector-ball_2.radius)<width))
-    &&(((ball_2.canvasCentre.y_vector+ball_2.radius)>0)&&((ball_2.canvasCentre.y_vector-ball_2.radius)<height))){
-        drawCircle(ball_2)
+    if ((((object_2.canvasCentre.x_vector+object_2.radius)>0)&&((object_2.canvasCentre.x_vector-object_2.radius)<width))
+    &&(((object_2.canvasCentre.y_vector+object_2.radius)>0)&&((object_2.canvasCentre.y_vector-object_2.radius)<height))){
+        drawCircle(object_2)
     }
 
-}
-
-//function that will take the distance of each magnet from the player/camera ball and move it appropriately in the 
-//canvas coordinates
-function universalToCanvasMagnets(ball_1, magnet_1){
-    //distance between player centre and magnet centre taken in actual coordinates
-    let distance = new Vector(ball_1.centre.x_vector-magnet_1.centre.x_vector, ball_1.centre.y_vector-magnet_1.centre.y_vector);
-    //canvas point is new vector that will get the coordinates for where the magnet will be placed compared to the player ball
-    let canvasPoint = new Vector(ball_1.canvasCentre.x_vector-distance.x_vector, ball_1.canvasCentre.y_vector-distance.y_vector);
-    //magnet's points now set as canvas points calculated as above
-    magnet_1.canvasCentre.x_vector = canvasPoint.x_vector;
-    magnet_1.canvasCentre.y_vector = canvasPoint.y_vector;
-    //if statement to ensure magnet is only drawn if it could appear on screen
-    if ((((magnet_1.canvasCentre.x_vector+magnet_1.radius)>0)&&((magnet_1.canvasCentre.x_vector-magnet_1.radius)<width))
-    &&(((magnet_1.canvasCentre.y_vector+magnet_1.radius)>0)&&((magnet_1.canvasCentre.y_vector-magnet_1.radius)<height))){
-        drawCircle(magnet_1);
-    }
 }
 
 //function that will take the distance of each block from the player/camera ball and move it appropriately in the 
 //canvas coordinates
-function universalToCanvasBlocks(ball_1, block_1){
+function universalToCanvasRectangles(ball_1, object_2){
     //distance between player centre and block top left corner taken in actual coordinates
-    let distance = new Vector(ball_1.centre.x_vector-block_1.start.x_vector, ball_1.centre.y_vector-block_1.start.y_vector);
+    let distance = new Vector(ball_1.centre.x_vector-object_2.start.x_vector, ball_1.centre.y_vector-object_2.start.y_vector);
     //canvas point is new vector that will get the coordinates for where block top left corner will be placed compared to the player
     let canvasPoint = new Vector(ball_1.canvasCentre.x_vector-distance.x_vector, ball_1.canvasCentre.y_vector-distance.y_vector);
     //block's points now set as canvas points calculated as above
-    block_1.canvasStart.x_vector = canvasPoint.x_vector;
-    block_1.canvasStart.y_vector = canvasPoint.y_vector;
+    object_2.canvasStart.x_vector = canvasPoint.x_vector;
+    object_2.canvasStart.y_vector = canvasPoint.y_vector;
     //if statement to ensure block is only drawn if it could appear on screen
-    if ((((block_1.canvasStart.x_vector+block_1.length.x_vector)>0)&&((block_1.canvasStart.x_vector)<width))
-    &&(((block_1.canvasStart.y_vector+block_1.length.y_vector)>0)&&((block_1.canvasStart.y_vector)<height))){
-        drawRectangle(block_1);
+    if ((((object_2.canvasStart.x_vector+object_2.length.x_vector)>0)&&((object_2.canvasStart.x_vector)<width))
+    &&(((object_2.canvasStart.y_vector+object_2.length.y_vector)>0)&&((object_2.canvasStart.y_vector)<height))){
+        drawRectangle(object_2);
     }
 }
-
-//function that will take the distance of each friction zone from the player/camera ball and move it appropriately in the 
-//canvas coordinates
-function universalToCanvasFrictionZones(ball_1, square_1){
-    //distance between player centre and friction zone top left corner taken in actual coordinates
-    let distance = new Vector(ball_1.centre.x_vector-square_1.upperpoint.x_vector, ball_1.centre.y_vector-square_1.upperpoint.y_vector);
-    //canvas point is new vector that will get the coordinates for the friction zone top left corner will be placed compared to the player
-    let canvasPoint = new Vector(ball_1.canvasCentre.x_vector-distance.x_vector, ball_1.canvasCentre.y_vector-distance.y_vector);
-    //friction zone's points now set as canvas points calculated as above
-    square_1.canvasStart.x_vector = canvasPoint.x_vector;
-    square_1.canvasStart.y_vector = canvasPoint.y_vector;
-    //if statement to ensure friction zone is only drawn if it could appear on screen
-    if ((((square_1.canvasStart.x_vector+square_1.length.x_vector)>0)&&((square_1.canvasStart.x_vector)<width))
-    &&(((square_1.canvasStart.y_vector+square_1.length.y_vector)>0)&&((square_1.canvasStart.y_vector)<height))){
-        drawRectangle(square_1);
-    }
-}
-
-//function that will take the distance of the edges of the canvas from the player/camera ball and move it appropriately in the 
-//canvas coordinates
-function universalToCanvasBorder(ball_1, canvas_1){
-    //distance between player centre and canvas top left corner taken in actual coordinates
-    let distanceUpper = new Vector(ball_1.centre.x_vector-canvas_1.universalStart.x_vector, ball_1.centre.y_vector-canvas_1.universalStart.y_vector);
-    //canvas point is new vector that will get the coordinates for the canvas top left corner will be placed compared to the player
-    let canvasPointUpper = new Vector(ball_1.canvasCentre.x_vector-distanceUpper.x_vector, 
-    ball_1.canvasCentre.y_vector-distanceUpper.y_vector);
-    //canvas's points now set as canvas points calculated as above
-    canvas_1.canvasStart.x_vector = canvasPointUpper.x_vector;
-    canvas_1.canvasStart.y_vector = canvasPointUpper.y_vector;
-    //canvas always drawn as it is always on screen
-    drawRectangle(canvas_1);
-}  
 
 //function that will take the distance of each teleporter from the player/camera ball and move it appropriately in the 
 //canvas coordinates
@@ -835,10 +752,6 @@ function functionGroup(ball_1){
     if (ball_1.ghost == false){
         //sets friction check false so friction will apply, whether by canvas or friction zone depending on ball location
         ball_1.frictionCheck = false;
-        //checks ball against each friction zone to check if ball is on any
-        FrictionSquareArray.forEach(square_1 => {
-            checkFriction(ball_1, square_1); 
-        });
         //if statement to ensure ball isn't checked against magnets unless magnetic 
         if (ball_1.magnetic == true){
             //ball checked against each magnet
@@ -855,6 +768,12 @@ function functionGroup(ball_1){
     //saves time with checking each ball in this method
     if (ball_1.accelerationVector.x_vector !== 0 || ball_1.accelerationVector.y_vector !== 0){
         addAcceleration(ball_1);
+    }
+    if (ball_1.ghost == false){
+        //checks ball against each friction zone to check if ball is on any
+        FrictionSquareArray.forEach(friction_1 => {
+            checkFriction(ball_1, friction_1); 
+        });
     }
     //checks ball is not checked for friction already before considering friction from canvas (also ensure canvas does not affect ghost)
     if (ball_1.frictionCheck == false && ball_1.ghost == false){
@@ -882,102 +801,102 @@ function initiate(){
         if (CanvasArray.length>1){
             CanvasArray.splice(0, CanvasArray.length);
         }
-        let defaultCanvas = new Canvas(0,0,1500,900, 0, "black", "turquoise");
+        let DefaultCanvas = new Canvas(0,0,1500,900, 0, "black", "turquoise");
     }
     //checks that each ball will appear within limits of canvas
     BallArray.forEach((ball_1) => {
-        if (ball_1.centre.x_vector-ball_1.radius<CanvasArray[0].universalStart.x_vector || ball_1.centre.x_vector+ball_1.radius
-            > (CanvasArray[0].universalStart.x_vector+CanvasArray[0].length.x_vector)){
-                ball_1.centre.x_vector = CanvasArray[0].universalStart.x_vector+ball_1.radius;
+        if (ball_1.centre.x_vector-ball_1.radius<CanvasArray[0].start.x_vector || ball_1.centre.x_vector+ball_1.radius
+            > (CanvasArray[0].start.x_vector+CanvasArray[0].length.x_vector)){
+                ball_1.centre.x_vector = CanvasArray[0].start.x_vector+ball_1.radius;
             }
-        if (ball_1.centre.y_vector-ball_1.radius<CanvasArray[0].universalStart.y_vector || ball_1.centre.y_vector+ball_1.radius
-            > (CanvasArray[0].universalStart.y_vector+CanvasArray[0].length.y_vector)){
-                ball_1.centre.y_vector = CanvasArray[0].universalStart.y_vector+ball_1.radius;
+        if (ball_1.centre.y_vector-ball_1.radius<CanvasArray[0].start.y_vector || ball_1.centre.y_vector+ball_1.radius
+            > (CanvasArray[0].start.y_vector+CanvasArray[0].length.y_vector)){
+                ball_1.centre.y_vector = CanvasArray[0].start.y_vector+ball_1.radius;
             }
     });
     //checks that each magnet will appear within limits of canvas
     MagnetArray.forEach((magnet_1) => {
-        if (magnet_1.centre.x_vector-magnet_1.radius<CanvasArray[0].universalStart.x_vector || magnet_1.centre.x_vector+magnet_1.radius
-            > (CanvasArray[0].universalStart.x_vector+CanvasArray[0].length.x_vector)){
-                magnet_1.centre.x_vector = CanvasArray[0].universalStart.x_vector+magnet_1.radius;
+        if (magnet_1.centre.x_vector-magnet_1.radius<CanvasArray[0].start.x_vector || magnet_1.centre.x_vector+magnet_1.radius
+            > (CanvasArray[0].start.x_vector+CanvasArray[0].length.x_vector)){
+                magnet_1.centre.x_vector = CanvasArray[0].start.x_vector+magnet_1.radius;
             }
-        if (magnet_1.centre.y_vector-magnet_1.radius<CanvasArray[0].universalStart.y_vector || magnet_1.centre.y_vector+magnet_1.radius
-            > (CanvasArray[0].universalStart.y_vector+CanvasArray[0].length.y_vector)){
-                magnet_1.centre.y_vector = CanvasArray[0].universalStart.y_vector+magnet_1.radius;
+        if (magnet_1.centre.y_vector-magnet_1.radius<CanvasArray[0].start.y_vector || magnet_1.centre.y_vector+magnet_1.radius
+            > (CanvasArray[0].start.y_vector+CanvasArray[0].length.y_vector)){
+                magnet_1.centre.y_vector = CanvasArray[0].start.y_vector+magnet_1.radius;
             }
     })
     //checks that each block will appear within limits of canvas
     BlockArray.forEach((block_1) => {
-        if (block_1.start.x_vector<CanvasArray[0].universalStart.x_vector || 
+        if (block_1.start.x_vector<CanvasArray[0].start.x_vector || 
             block_1.start.x_vector+block_1.length.x_vector 
-            > (CanvasArray[0].universalStart.x_vector+CanvasArray[0].length.x_vector)){
+            > (CanvasArray[0].start.x_vector+CanvasArray[0].length.x_vector)){
                 //ensures that if block's length is greater than canvas's it will be reduced to fit
                 if (block_1.length.x_vector>CanvasArray[0].length.x_vector){
                     block_1.length.x_vector = CanvasArray[0].length.x_vector;
                 } 
-                block_1.start.x_vector = CanvasArray[0].universalStart.x_vector;
+                block_1.start.x_vector = CanvasArray[0].start.x_vector;
             }
-        if (block_1.start.y_vector<CanvasArray[0].universalStart.y_vector || 
+        if (block_1.start.y_vector<CanvasArray[0].start.y_vector || 
             block_1.start.y_vector+block_1.length.y_vector 
-            > (CanvasArray[0].universalStart.y_vector+CanvasArray[0].length.y_vector)){
+            > (CanvasArray[0].start.y_vector+CanvasArray[0].length.y_vector)){
                 //ensures that if block's height is greater than canvas's it will be reduced to fit
                 if (block_1.length.y_vector>CanvasArray[0].length.y_vector){
                     block_1.length.y_vector = CanvasArray[0].length.y_vector;
                 } 
-                block_1.start.y_vector = CanvasArray[0].universalStart.y_vector;
+                block_1.start.y_vector = CanvasArray[0].start.y_vector;
             }
     })
     //checks that each friction zone will appear within limits of canvas
     FrictionSquareArray.forEach((friction_1) => {
-        if (friction_1.upperpoint.x_vector<CanvasArray[0].universalStart.x_vector || 
-            friction_1.upperpoint.x_vector+friction_1.length.x_vector 
-            > (CanvasArray[0].universalStart.x_vector+CanvasArray[0].length.x_vector)){
+        if (friction_1.start.x_vector<CanvasArray[0].start.x_vector || 
+            friction_1.start.x_vector+friction_1.length.x_vector 
+            > (CanvasArray[0].start.x_vector+CanvasArray[0].length.x_vector)){
                 //ensures that if friction zone's length is greater than canvas's it will be reduced to fit
                 if (friction_1.length.x_vector>CanvasArray[0].length.x_vector){
                     friction_1.length.x_vector = CanvasArray[0].length.x_vector;
                 } 
-                friction_1.upperpoint.x_vector = CanvasArray[0].universalStart.x_vector;
+                friction_1.start.x_vector = CanvasArray[0].start.x_vector;
             }
-        if (friction_1.upperpoint.y_vector<CanvasArray[0].universalStart.y_vector || 
-            friction_1.upperpoint.y_vector+friction_1.length.y_vector 
-            > (CanvasArray[0].universalStart.y_vector+CanvasArray[0].length.y_vector)){
+        if (friction_1.start.y_vector<CanvasArray[0].start.y_vector || 
+            friction_1.start.y_vector+friction_1.length.y_vector 
+            > (CanvasArray[0].start.y_vector+CanvasArray[0].length.y_vector)){
                 //ensures that if friction zone's height is greater than canvas's it will be reduced to fit
                 if (friction_1.length.y_vector>CanvasArray[0].length.y_vector){
                     friction_1.length.y_vector = CanvasArray[0].length.y_vector;
                 } 
-                friction_1.upperpoint.y_vector = CanvasArray[0].universalStart.y_vector;
+                friction_1.start.y_vector = CanvasArray[0].start.y_vector;
             }
     })
     //checks that each teleporter will appear within limits of canvas and teleport within limits
     TeleportArray.forEach((teleporter_1)=> {
-        if (teleporter_1.start.x_vector<CanvasArray[0].universalStart.x_vector || 
+        if (teleporter_1.start.x_vector<CanvasArray[0].start.x_vector || 
             teleporter_1.start.x_vector+teleporter_1.length.x_vector 
-            > (CanvasArray[0].universalStart.x_vector+CanvasArray[0].length.x_vector)){
+            > (CanvasArray[0].start.x_vector+CanvasArray[0].length.x_vector)){
                 //ensures that if teleporter's length is greater than canvas's it will be reduced to fit
                 if (teleporter_1.length.x_vector>CanvasArray[0].length.x_vector){
                     teleporter_1.length.x_vector = CanvasArray[0].length.x_vector;
                 } else{
-                    teleporter_1.start.x_vector = CanvasArray[0].universalStart.x_vector;
+                    teleporter_1.start.x_vector = CanvasArray[0].start.x_vector;
                 }
             }
-        if (teleporter_1.start.y_vector<CanvasArray[0].universalStart.y_vector || 
+        if (teleporter_1.start.y_vector<CanvasArray[0].start.y_vector || 
             teleporter_1.start.y_vector+teleporter_1.length.y_vector 
-            > (CanvasArray[0].universalStart.y_vector+CanvasArray[0].length.y_vector)){
+            > (CanvasArray[0].start.y_vector+CanvasArray[0].length.y_vector)){
                 //ensures that if teleporter's height is greater than canvas's it will be reduced to fit
                 if (teleporter_1.length.y_vector>CanvasArray[0].length.y_vector){
                     teleporter_1.length.y_vector = CanvasArray[0].length.y_vector;
                 } else{
-                    teleporter_1.start.y_vector = CanvasArray[0].universalStart.y_vector;
+                    teleporter_1.start.y_vector = CanvasArray[0].start.y_vector;
                 }
             }
         //ensures that if teleporter would move objects outside of canvas then teleport point is moved to centre of canvas for x or y
-        if (teleporter_1.teleportPoint.x_vector<=CanvasArray[0].universalStart.x_vector || teleporter_1.teleportPoint.x_vector 
-            >= (CanvasArray[0].universalStart.x_vector+CanvasArray[0].length.x_vector)){
-                teleporter_1.teleportPoint.x_vector = (CanvasArray[0].universalStart.x_vector+CanvasArray[0].length.x_vector)/2;
+        if (teleporter_1.teleportPoint.x_vector<=CanvasArray[0].start.x_vector || teleporter_1.teleportPoint.x_vector 
+            >= (CanvasArray[0].start.x_vector+CanvasArray[0].length.x_vector)){
+                teleporter_1.teleportPoint.x_vector = (CanvasArray[0].start.x_vector+CanvasArray[0].length.x_vector)/2;
             }
-        if (teleporter_1.teleportPoint.y_vector<=CanvasArray[0].universalStart.y_vector || teleporter_1.teleportPoint.y_vector
-            >= (CanvasArray[0].universalStart.y_vector+CanvasArray[0].length.y_vector)){
-                teleporter_1.teleportPoint.y_vector = (CanvasArray[0].universalStart.y_vector+CanvasArray[0].length.y_vector)/2;
+        if (teleporter_1.teleportPoint.y_vector<=CanvasArray[0].start.y_vector || teleporter_1.teleportPoint.y_vector
+            >= (CanvasArray[0].start.y_vector+CanvasArray[0].length.y_vector)){
+                teleporter_1.teleportPoint.y_vector = (CanvasArray[0].start.y_vector+CanvasArray[0].length.y_vector)/2;
             }
     });
     //if statement to check if there is more than one player ball or 0
@@ -1001,36 +920,36 @@ function mainLoop() {
     //ensures that the full areas are cleared so that there are not repeat frames on top of each other, even off screen, as
     //this can affect performance
     if (CanvasArray[0].length.x_vector<=width&&CanvasArray[0].length.y_vector<=height){
-        ctx.clearRect(CanvasArray[0].universalStart.x_vector, CanvasArray[0].universalStart.y_vector, 
+        ctx.clearRect(CanvasArray[0].start.x_vector, CanvasArray[0].start.y_vector, 
             width, height);
     } else if (CanvasArray[0].length.x_vector<=width&&CanvasArray[0].length.y_vector>height){
-        ctx.clearRect(CanvasArray[0].universalStart.x_vector, CanvasArray[0].universalStart.y_vector, 
-            width, CanvasArray[0].universalStart.y_vector+CanvasArray[0].length.y_vector);
+        ctx.clearRect(CanvasArray[0].start.x_vector, CanvasArray[0].start.y_vector, 
+            width, CanvasArray[0].start.y_vector+CanvasArray[0].length.y_vector);
     } else if (CanvasArray[0].length.x_vector>width&&CanvasArray[0].length.y_vector<=height){
-        ctx.clearRect(CanvasArray[0].universalStart.x_vector, CanvasArray[0].universalStart.y_vector, 
-            CanvasArray[0].universalStart.x_vector+CanvasArray[0].length.x_vector, height);
+        ctx.clearRect(CanvasArray[0].start.x_vector, CanvasArray[0].start.y_vector, 
+            CanvasArray[0].start.x_vector+CanvasArray[0].length.x_vector, height);
     } else {
-        ctx.clearRect(CanvasArray[0].universalStart.x_vector, CanvasArray[0].universalStart.y_vector, 
-            CanvasArray[0].universalStart.x_vector+CanvasArray[0].length.x_vector, CanvasArray[0].universalStart.x_vector+CanvasArray[0].length.y_vector);
+        ctx.clearRect(CanvasArray[0].start.x_vector, CanvasArray[0].start.y_vector, 
+            CanvasArray[0].start.x_vector+CanvasArray[0].length.x_vector, CanvasArray[0].start.x_vector+CanvasArray[0].length.y_vector);
     }
     //checks position of each object against the position of the player ball and then draws them if on screen (see universal
     //to canvas methods)
-    universalToCanvasBorder(PlayerBallArray[0], CanvasArray[0]);
-    FrictionSquareArray.forEach((square_1) => {
-        universalToCanvasFrictionZones(PlayerBallArray[0], square_1);
+    universalToCanvasRectangles(PlayerBallArray[0], CanvasArray[0]);
+    FrictionSquareArray.forEach((friction_1) => {
+        universalToCanvasRectangles(PlayerBallArray[0], friction_1);
     });
     TeleportArray.forEach((teleport_1) => {
         universalToCanvasTeleporters(PlayerBallArray[0], teleport_1);
     })
     MagnetArray.forEach((magnet_1) => {
-        universalToCanvasMagnets(PlayerBallArray[0], magnet_1);
+        universalToCanvasCircles(PlayerBallArray[0], magnet_1);
     });
     BlockArray.forEach((block_1) => {
-        universalToCanvasBlocks(PlayerBallArray[0], block_1);
+        universalToCanvasRectangles(PlayerBallArray[0], block_1);
     });
     BallArray.forEach((ball_2) => {
         if (ball_2.player == false){
-            universalToCanvasBalls(PlayerBallArray[0], ball_2);
+            universalToCanvasCircles(PlayerBallArray[0], ball_2);
         }
     });
     //draws player ball

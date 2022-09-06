@@ -84,28 +84,28 @@ let Teleporter15 = new Teleporter (200, 1300, 100, 100, 100, 350, "black", "gold
 
 
 
-let Ball1 = new Ball(100, 100, 20, 10, 0, 0, 5, 1, true, "South", 40, false, true, false, "black", "red", false);
+let Ball1 = new Ball(100, 100, 20, 10, 0, 0, 5, 1, true, "South", 40, false, true, false, "black", "red");
 
-let Ball2 = new Ball(930, 1170, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "turquoise", false);
+let Ball2 = new Ball(930, 1170, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "turquoise");
 
-let Ball3 = new Ball(970, 1070, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "turquoise", false);
+let Ball3 = new Ball(970, 1070, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "turquoise");
 
-let Ball4 = new Ball(930, 970, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "turquoise", false);
+let Ball4 = new Ball(930, 970, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "turquoise");
 
-let Ball5 = new Ball(970, 870, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "turquoise", false);
+let Ball5 = new Ball(970, 870, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "turquoise");
 
-let Ball6 = new Ball(930, 770, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "turquoise", false);
+let Ball6 = new Ball(930, 770, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "turquoise");
 
-let Ball7 = new Ball(970, 670, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "turquoise", false);
+let Ball7 = new Ball(970, 670, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "turquoise");
 
-let Ball8 = new Ball(930, 570, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "turquoise", false);
+let Ball8 = new Ball(930, 570, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "turquoise");
 
-let Ball9 = new Ball(970, 470, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "turquoise", false);
+let Ball9 = new Ball(970, 470, 30, 20, 0, 0, 5, 1, false, "/", 0, true, false, false, "black", "turquoise");
 
-let Ball10 = new Ball(670, 650, 30, 20, 0, 0, 5, 1, true, "South", 40, true, false, false, "black", "turquoise", false);
+let Ball10 = new Ball(670, 650, 30, 20, 0, 0, 5, 1, true, "South", 40, true, false, false, "black", "turquoise");
 
-let Ball11 = new Ball(670, 1050, 30, 20, 0, 0, 5, 1, true, "South", 40, true, false, false, "black", "turquoise", false);
+let Ball11 = new Ball(670, 1050, 30, 20, 0, 0, 5, 1, true, "South", 40, true, false, false, "black", "turquoise");
 
-let Ball12 = new Ball(100, 350, 30, 10, -3, 5, 5, 1, false, "/", 0, false, false, false, "black", "red", false);
+let Ball12 = new Ball(100, 350, 30, 10, -3, 5, 5, 1, false, "/", 0, false, false, false, "black", "red");
 
 initiate();
