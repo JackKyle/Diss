@@ -26,7 +26,7 @@ class Vector{
         return Math.sqrt(this.x_vector**2 + this.y_vector**2);
     } 
     //method to get dot product of vector
-    dotproduct(vector_2){
+    dotProduct(vector_2){
         return ((this.x_vector*vector_2.x_vector)+(this.y_vector*vector_2.y_vector));
     }
 }
@@ -211,8 +211,6 @@ class Teleporter extends Rectangle{
         super(xstart,ystart,xlength,ylength, outline, fill);
         //teleport point held as vector with x and y component
         this.teleportPoint = new Vector (xteleport, yteleport);
-        //canvas point set as 0,0 by default before being corrected for player/camera
-        this.canvasTeleportPoint = new Vector(0,0);
         this.circle = circle;
         //circle centre set as vector with x and y components
         this.circleCentre = new Vector (this.start.x_vector+(xlength/2),this.start.y_vector+(ylength/2));
@@ -309,11 +307,11 @@ function ballVectors(ball_1, ball_2){
         //get unit tangent vector of collision 
         let unitTangentVector = new Vector(unitNormalVector.y_vector*-1, unitNormalVector.x_vector);
         //get initial ball 1 normal direction velocity by taking dot product of ball's velocity and that of the unit normal vector
-        let initialBall1Normal = ball_1.velocity.dotproduct(unitNormalVector);
+        let initialBall1Normal = ball_1.velocity.dotProduct(unitNormalVector);
         //get initial ball 1 tangent direction velocity by taking dot product of ball's velocity and that of unit tangent vector
-        let ball1Tangent = ball_1.velocity.dotproduct(unitTangentVector);
-        let initialBall2Normal = ball_2.velocity.dotproduct(unitNormalVector);
-        let ball2Tangent = ball_2.velocity.dotproduct(unitTangentVector);
+        let ball1Tangent = ball_1.velocity.dotProduct(unitTangentVector);
+        let initialBall2Normal = ball_2.velocity.dotProduct(unitNormalVector);
+        let ball2Tangent = ball_2.velocity.dotProduct(unitTangentVector);
         //final ball 1 normal velocity taken from formula 
         let finalBall1Normal = ((initialBall1Normal*(ball_1.mass-ball_2.mass))+(2*ball_2.mass*initialBall2Normal))/
         (ball_1.mass+ball_2.mass);
@@ -412,7 +410,7 @@ function checkEdges(ball_1, canvas_1){
         if (ball_1.centre.x_vector<=ball_1.radius){
             ball_1.centre.x_vector = canvas_1.start.x_vector+ball_1.radius;
         } else if (ball_1.centre.x_vector >= (canvas_1.length.x_vector-ball_1.radius)){
-            ball_1.centre.x_vector = canvas_1.length.x_vector - ball_1.radius;
+            ball_1.centre.x_vector = canvas_1.start.x_vector+canvas_1.length.x_vector - ball_1.radius;
         }
         ball_1.velocity.x_vector = -1 * ball_1.velocity.x_vector;
     }
