@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="demos.css" > 
+    <link href='https://fonts.googleapis.com/css?family=Allan' rel='stylesheet'>
     <style>
         #canvas{
             border: 1px solid black;
@@ -14,11 +16,27 @@
     <title>Ball Round Up!</title>
 </head>
 <body>
-
-    <a href="index.html"> Home!</a>
+    <div class = all> 
+        <div class = bottom>
+            <div class = sidebar>
+                <div  class = sidebarText>
+                    <p>Round up the balls into the teleporter by just bashing them with your own!</p>
+                    <br>
+                    <p>Choose a demo to try!</p>
+                    <br>
+                    <p><a href="index.html"> Meteor watch!</a></p>
+                    <br>
+                    <p><a href="obstacleCourse.html"> Obstacle Course!</a></p>
+                </div>
+            </div>
+            <div class = canvasArea>
+                <canvas id="canvas" tabindex = 0 width="1500" height="900"></canvas>
+                <script type = "module" src="ballRoundUp.js"></script> 
+            </div>
+        </div>
+    </div>
     
-    <canvas id="canvas" tabindex = 0 width="1500" height="900"></canvas>
     
-    <script type = "module" src="ballRoundUp.js"></script>
+    
 </body>
 </html>

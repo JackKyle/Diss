@@ -2,8 +2,6 @@ import { initiate, FrictionZone, Ball, Magnet, Block, Canvas, Teleporter} from '
 
 let defaultCanvas = new Canvas(0, 0, 1200,1500, 0.1, "black", "grey");
 
-
-
 let Friction1 = new FrictionZone(900, 200, 100, 100, "black", "purple", 0.5);
 
 let Friction2 = new FrictionZone(700, 1300, 100, 100, "black", "purple", 0.5);
@@ -13,8 +11,6 @@ let Friction3 = new FrictionZone(300, 300, 100, 100, "black", "purple", 0.5);
 let Friction5 = new FrictionZone(300, 400, 100, 1000, "black", "orange", -0.001);
 
 let Friction6 = new FrictionZone(0, 300, 200, 1200, "black", "pink", 0.001);
-
-
 
 let block1 = new Block(0, 200, 300, 100, "black", "Silver");
 
@@ -56,15 +52,11 @@ let block19 = new Block(200, 1400, 100, 100, "black", "Silver");
 
 let block20 = new Block(200, 300, 100, 300, "black", "Silver");
 
-
-
 let magnet1 = new Magnet (1150, 350, 20, 1000, "North", "black", "white");
 
 let magnet2 = new Magnet (1150, 750, 20, 1000, "North", "black", "white");
 
 let magnet3 = new Magnet (1150, 1150, 20, 1000, "North", "black", "white");
-
-
 
 let Teleporter1 = new Teleporter (200, 0, 100, 100, 100, 100, "black", "gold", "silver");
 
@@ -81,8 +73,6 @@ let Teleporter13 = new Teleporter (500, 500, 100, 1000, 750, 1350, "black", "gol
 let Teleporter14 = new Teleporter (300, 1400, 100, 100, 350, 350, "black", "gold", "silver");
 
 let Teleporter15 = new Teleporter (200, 1300, 100, 100, 100, 350, "black", "gold", "silver");
-
-
 
 let Ball1 = new Ball(100, 100, 20, 10, 0, 0, 5, 1, true, "South", 40, false, true, false, "black", "red");
 

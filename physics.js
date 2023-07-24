@@ -376,6 +376,11 @@ function addAcceleration(ball_1){
 //function to add velocity to the placement of the ball
 function addVelocity(ball_1){
     //velocities added to position of ball to move it
+    if (ball_1.player == true){
+        console.log(ball_1.velocity.x_vector);
+        console.log(ball_1.velocity.y_vector);
+    }
+    
     ball_1.centre.x_vector += ball_1.velocity.x_vector;
     ball_1.centre.y_vector += ball_1.velocity.y_vector;
 }
@@ -660,6 +665,8 @@ function playerControl(ball_1){
         //if the direction would be negative in terms of the canvas then the scalar is multiplied by -1
         if(moveRight == true){
             ball_1.accelerationVector.x_vector = ball_1.accelerationScalar;
+            console.log("key pressed");
+            console.log(ball_1.accelerationScalar);
         }
         if(moveLeft == true){
             ball_1.accelerationVector.x_vector = -ball_1.accelerationScalar;
@@ -907,7 +914,7 @@ function initiate(){
             PlayerBallArray.splice(0, PlayerBallArray.length);
         }
         //default ball created to act as camera to watch game/simulation
-        let PlayerCamera = new Ball(100, 100, 0, 0.00001, 0, 0, 5, 0.1, false, "/", 0, false, true, true, CanvasArray[0].fill, CanvasArray[0].fill);
+        let PlayerCamera = new Ball(CanvasArray[0].start.x_vector+100, CanvasArray[0].start.y_vector+100, 0, 0.00001, 0, 0, 5, 0.1, false, "/", 0, false, true, true, CanvasArray[0].fill, CanvasArray[0].fill);
     }
     //code goes into main loop that will repeat
     requestAnimationFrame(mainLoop);
